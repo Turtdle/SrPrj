@@ -3,7 +3,7 @@ FROM node:16-alpine
 
 # Install Python and dependencies
 RUN apk add --no-cache python3 py3-pip docker
-RUN pip3 install python-docx anthropic
+RUN pip3 install python-docx==0.8.11 anthropic==0.7.0
 
 # Set working directory
 WORKDIR /app

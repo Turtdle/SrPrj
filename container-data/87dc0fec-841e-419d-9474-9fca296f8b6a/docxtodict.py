@@ -27,22 +27,28 @@ try:
         
     client = anthropic.Anthropic(api_key=api_key)
 
-    # Update to use older Anthropic client syntax
     message = client.messages.create(
-        model="claude-3-opus-20240229",  # Use a model that exists in older versions
+        model="claude-3-7-sonnet-20250219",
         max_tokens=1000,
         temperature=0.2,  # Lower temperature for more consistent formatting
         system="You are a perfect program converting natural language into json; Do not include any formatting including newlines or text other than json",
         messages=[
             {
                 "role": "user",
-                "content": "Please convert this doc into json, separating the resume into parts such as {experience: [experience], education: [education], skills: {languages: [], tools: []}, projects: [], contact: {}, name: ''}: " + resume_text
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Please convert this doc into json, separating the resume into parts such as {experience: [experience], education: [education], skills: {languages: [], tools: []}, projects: [], contact: {}, name: ''}: " + resume_text
+                    }
+                ]
             }
         ]
     )
     
-    # Access content correctly based on older API version
-    string_content = message.content
+    text_blocks = message.content 
+    string_content = ''
+    for block in text_blocks:
+        string_content += block.text
 
     # Validate JSON before saving
     try:

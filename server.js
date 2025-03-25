@@ -39,18 +39,39 @@ app.post('/upload', upload.single('docxFile'), (req, res) => {
     // Copy uploaded file to container directory
     fs.copyFileSync(docxPath, path.join(containerDir, 'doc.docx'));
     
-    // Process the document with Python script
-    exec(`cd ${containerDir} && python ../../docx_handler/docxtodict.py`, (error, stdout, stderr) => {
+    // Copy the Python scripts to the container directory
+    fs.copyFileSync(
+        path.join(__dirname, 'docx_handler', 'docxparser.py'),
+        path.join(containerDir, 'docxparser.py')
+    );
+    fs.copyFileSync(
+        path.join(__dirname, 'docx_handler', 'docxtodict.py'),
+        path.join(containerDir, 'docxtodict.py')
+    );
+    
+    // Process the document with Python script, ensuring environment variables are passed
+    // Directly use the environment variable from the current process
+    exec(`cd ${containerDir} && python3 docxtodict.py`, {
+        env: {
+            ...process.env,
+            PATH: process.env.PATH
+        }
+    }, (error, stdout, stderr) => {
         if (error) {
             console.error(`Error processing document: ${error.message}`);
+            console.error(`stdout: ${stdout}`);
+            console.error(`stderr: ${stderr}`);
             return res.status(500).send('Error processing document');
         }
+        
+        console.log(`Document processed: ${stdout}`);
         
         // Launch Docker container
         exec(`docker run -d -p ${containerPort}:80 -v ${containerDir}:/app/data --name resume-${containerId} resume-viewer`, 
             (error, stdout, stderr) => {
                 if (error) {
                     console.error(`Error launching container: ${error.message}`);
+                    console.error(`Docker stderr: ${stderr}`);
                     return res.status(500).send('Error launching container');
                 }
                 
