@@ -26,17 +26,17 @@ fi
 
 # Check if source file exists
 log "Checking if source data.json exists:"
-if [ -f "/app/data/data.json" ]; then
-  log "✓ Source file /app/data/data.json exists"
-  log "File size: $(stat -c%s /app/data/data.json) bytes"
+if [ -f "/app/data.json" ]; then
+  log "✓ Source file /app/data.json exists"
+  log "File size: $(stat -c%s /app/data.json) bytes"
   log "Source data.json contents (first 100 chars):"
-  head -c 100 /app/data/data.json | tee -a $LOGFILE
+  head -c 100 /app/data.json | tee -a $LOGFILE
   log "..."
 else
-  log "✗ ERROR: Source file /app/data/data.json does not exist!"
+  log "✗ ERROR: Source file /app/data.json does not exist!"
   log "Creating an empty placeholder data.json"
   echo '{"name":"Test User","contact":{"email":"test@example.com","phone":"123-456-7890","location":"Anywhere, USA"},"education":[{"institution":"Test University","degree":"Test Degree","graduation_date":"2025","gpa":"4.0","relevant_coursework":["Course 1"]}],"experience":[{"position":"Test Position","company":"Test Company","duration":"2023-Present","location":"Test Location","responsibilities":["Test responsibility"]}],"skills":{"languages":["Test Language"],"tools":["Test Tool"]},"projects":[{"name":"Test Project","description":"Test Description","technologies":["Test Tech"]}]}' > /tmp/data.json
-  cp /tmp/data.json /app/data/data.json
+  cp /tmp/data.json /app/data.json
   log "Created placeholder data.json"
 fi
 
