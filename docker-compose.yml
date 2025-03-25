@@ -9,6 +9,8 @@ services:
       - ./:/app
       - /app/node_modules
       - /var/run/docker.sock:/var/run/docker.sock
+    env_file:
+      - .env
     environment:
       - NODE_ENV=production
     restart: unless-stopped
@@ -16,7 +18,7 @@ services:
 
   resume-viewer-builder:
     build:
-      context: ./resume-template
-      dockerfile: Dockerfile.build
+      context: .
+      dockerfile: resume-template/Dockerfile.build
     image: resume-viewer
     container_name: resume-viewer-builder

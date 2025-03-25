@@ -7,11 +7,15 @@ RUN apk add --update nodejs npm
 # Set working directory
 WORKDIR /app
 
-# Copy template website files
-COPY resume-template /app
+# Copy package files
+COPY resume-template/package*.json ./
 
 # Install dependencies
 RUN npm install
+
+# Copy resume website files
+COPY resume-template/public ./public
+COPY resume-template/src ./src
 
 # Build the static site
 RUN npm run build
