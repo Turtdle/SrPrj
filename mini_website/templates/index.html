@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Website Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Resume Website Generator</h1>
+    </header>
+    <main>
+        <div class="center-flex">
+            <div class="upload-container">
+                <h2>Upload Your JSON Resume</h2>
+                <div id="drop-zone" class="drop-zone">
+                    <p>Drag & Drop JSON file here or click to upload</p>
+                    <input type="file" id="file-input" hidden accept=".json">
+                </div>
+                <div id="result-area" class="result-area"></div>
+            </div>
+        </div>
+    </main>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
