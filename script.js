@@ -37,13 +37,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const file = files[0]; // Handle first file only
         console.log('File received:', file.name);
         
+        const resultArea = document.getElementById('result-area');
+        
+        // Reset drop zone to original state
+        dropZone.innerHTML = `<p>Drag & Drop files here or click to upload</p>`;
+        
         // Check if file is a .docx file
         if (!file.name.endsWith('.docx')) {
-            dropZone.innerHTML = `<p style="color: red;">Please upload a .docx file</p>`;
+            resultArea.innerHTML = `<p style="color: red;">Please upload a .docx file</p>`;
             return;
         }
         
-        dropZone.innerHTML = `<p>Processing ${file.name}...</p>`;
+        resultArea.innerHTML = `<p>Processing ${file.name}...</p>`;
         
         // Create form data and append file
         const formData = new FormData();
@@ -57,17 +62,17 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             
             if (response.ok) {
-                dropZone.innerHTML = `
+                resultArea.innerHTML = `
                     <p style="color: green;">Success! JSON file created from ${file.name}</p>
-                    <p><a href="/blank.html" target="_blank" style="display: inline-block; margin-top: 10px; padding: 8px 16px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 4px;">Go to Blank Page</a></p>
+                    <a href="/blank.html" target="_blank" class="btn-primary">Go to Blank Page</a>
                 `;
             } else {
                 const error = await response.text();
-                dropZone.innerHTML = `<p style="color: red;">Error: ${error}</p>`;
+                resultArea.innerHTML = `<p style="color: red;">Error: ${error}</p>`;
             }
         } catch (error) {
             console.error('Error uploading file:', error);
-            dropZone.innerHTML = `<p style="color: red;">Error uploading file: ${error.message}</p>`;
+            resultArea.innerHTML = `<p style="color: red;">Error uploading file: ${error.message}</p>`;
         }
     }
 });
