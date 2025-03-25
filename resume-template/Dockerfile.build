@@ -1,0 +1,30 @@
+# Dockerfile for Resume Viewer
+FROM nginx:alpine
+
+# Install Node.js and npm
+RUN apk add --update nodejs npm
+
+# Set working directory
+WORKDIR /app
+
+# Copy template website files
+COPY resume-template /app
+
+# Install dependencies
+RUN npm install
+
+# Build the static site
+RUN npm run build
+
+# Copy the built files to Nginx serve directory
+RUN cp -r build/* /usr/share/nginx/html/
+
+# Copy startup script
+COPY start-container.sh /start-container.sh
+RUN chmod +x /start-container.sh
+
+# Set entrypoint
+ENTRYPOINT ["/start-container.sh"]
+
+# Expose port
+EXPOSE 80

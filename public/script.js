@@ -1,19 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
     const dropZone = document.getElementById('drop-zone');
     const fileInput = document.getElementById('file-input');
-
+    const resultArea = document.getElementById('result-area');
 
     dropZone.addEventListener('click', () => {
         fileInput.click();
     });
-
 
     fileInput.addEventListener('change', (e) => {
         if (e.target.files.length) {
             handleFiles(e.target.files);
         }
     });
-
 
     dropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
@@ -36,8 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
     async function handleFiles(files) {
         const file = files[0]; // Handle first file only
         console.log('File received:', file.name);
-        
-        const resultArea = document.getElementById('result-area');
         
         // Reset drop zone to original state
         dropZone.innerHTML = `<p>Drag & Drop files here or click to upload</p>`;
@@ -62,10 +58,18 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             
             if (response.ok) {
-                resultArea.innerHTML = `
-                    <p style="color: green;">Success! JSON file created from ${file.name}</p>
-                    <a href="/blank.html" target="_blank" class="btn-primary">Go to Blank Page</a>
-                `;
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultArea.innerHTML = `
+                        <p style="color: green;">Success! Your resume website is ready!</p>
+                        <a href="${data.url}" target="_blank" class="btn-primary">View Your Resume Website</a>
+                        <p><small>Container ID: ${data.containerId}</small></p>
+                        <p><small>This website will be available for 24 hours</small></p>
+                    `;
+                } else {
+                    resultArea.innerHTML = `<p style="color: red;">Error: ${data.message || 'Unknown error'}</p>`;
+                }
             } else {
                 const error = await response.text();
                 resultArea.innerHTML = `<p style="color: red;">Error: ${error}</p>`;

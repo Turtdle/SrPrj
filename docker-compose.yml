@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  main-website:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./:/app
+      - /app/node_modules
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    container_name: resume-generator-main
+
+  resume-viewer-builder:
+    build:
+      context: ./resume-template
+      dockerfile: Dockerfile.build
+    image: resume-viewer
+    container_name: resume-viewer-builder
