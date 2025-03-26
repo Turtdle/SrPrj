@@ -9,6 +9,31 @@ const { v4: uuidv4 } = require('uuid');
 const app = express();
 const port = 3000;
 
+
+function ensureResumeViewerImageExists() {
+    return new Promise((resolve, reject) => {
+      // Check if image exists
+      exec('docker image inspect resume-viewer', (error) => {
+        if (error) {
+          console.log('Resume viewer image not found, building it now...');
+          // Build the image
+          exec('docker build -t resume-viewer -f resume-template/Dockerfile.build .', (buildError, stdout, stderr) => {
+            if (buildError) {
+              console.error('Error building resume-viewer image:', stderr);
+              reject(buildError);
+            } else {
+              console.log('Successfully built resume-viewer image');
+              resolve();
+            }
+          });
+        } else {
+          console.log('Resume viewer image already exists');
+          resolve();
+        }
+      });
+    });
+  }
+  
 // Find the appropriate Python interpreter for the environment
 function findPythonInterpreter() {
     // Check if we're running in a Docker container
@@ -127,29 +152,64 @@ app.post('/upload', upload.single('docxFile'), (req, res) => {
         console.log(`Document processed: ${stdout}`);
         
         // Launch Docker container
-        exec(`docker run -d -p ${containerPort}:80 -v ${containerDir}:/app/data --name resume-${containerId} resume-viewer`, 
-            (error, stdout, stderr) => {
-                if (error) {
-                    console.error(`Error launching container: ${error.message}`);
-                    console.error(`Docker stderr: ${stderr}`);
-                    return res.status(500).send('Error launching container');
-                }
-                
-                // Store container info
-                activeContainers[containerId] = {
-                    id: stdout.trim(),
-                    port: containerPort,
-                    createdAt: new Date()
-                };
-                
-                // Return container URL to client
-                res.json({
-                    success: true,
-                    containerId: containerId,
-                    url: `http://localhost:${containerPort}`
-                });
-            }
-        );
+        console.log(`Making data.json accessible...`);
+exec(`chmod -R 755 ${containerDir}`, (chmodError) => {
+    if (chmodError) {
+        console.error(`Warning: chmod failed: ${chmodError.message}`);
+    }
+    
+    // Launch Docker container with multiple volume mounts
+    const dockerRunCmd = `
+    # First run the container
+    docker run -d -p ${containerPort}:80 --name resume-${containerId} resume-viewer && 
+    
+    # Then copy the data.json file directly into the container
+    docker cp ${path.join(containerDir, 'data.json')} resume-${containerId}:/usr/share/nginx/html/data.json && 
+    
+    # Make sure it has the right permissions
+    docker exec resume-${containerId} chmod 644 /usr/share/nginx/html/data.json
+`;
+
+console.log(`Executing Docker command: ${dockerRunCmd}`);
+const dataJsonPath = path.join(containerDir, 'data.json');
+if (!fs.existsSync(dataJsonPath)) {
+    console.error(`Error: data.json not found at ${dataJsonPath}`);
+    return res.status(500).send('Error: Resume data not found');
+}
+
+const fileSize = fs.statSync(dataJsonPath).size;
+if (fileSize === 0) {
+    console.error(`Error: data.json is empty (0 bytes)`);
+    return res.status(500).send('Error: Resume data is empty');
+}
+
+console.log(`Verified data.json exists (${fileSize} bytes)`);
+
+// Log the first 100 characters to verify content
+const previewContent = fs.readFileSync(dataJsonPath, 'utf8').substring(0, 100);
+console.log(`Data preview: ${previewContent}...`);
+exec(dockerRunCmd, (error, stdout, stderr) => {
+    if (error) {
+        console.error(`Error with Docker commands: ${error.message}`);
+        console.error(`Docker stderr: ${stderr}`);
+        return res.status(500).send('Error launching container');
+    }
+    
+    // Store container info
+    activeContainers[containerId] = {
+        id: stdout.trim(),
+        port: containerPort,
+        createdAt: new Date()
+    };
+    
+    // Return container URL to client
+    res.json({
+        success: true,
+        containerId: containerId,
+        url: `http://localhost:${containerPort}`
+    });
+});
+});
     });
 });
 

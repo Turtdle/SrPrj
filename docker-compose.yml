@@ -16,9 +16,11 @@ services:
     restart: unless-stopped
     container_name: resume-generator-main
 
-  resume-viewer-builder:
-    build:
-      context: .
-      dockerfile: resume-template/Dockerfile.build
-    image: resume-viewer
-    container_name: resume-viewer-builder
+  # The resume-viewer-builder service is now commented out
+  # It will be built and used by the main service only when needed
+  #resume-viewer-builder:
+  #  build:
+  #    context: .
+  #    dockerfile: resume-template/Dockerfile.build
+  #  image: resume-viewer
+  #  container_name: resume-viewer-builder
