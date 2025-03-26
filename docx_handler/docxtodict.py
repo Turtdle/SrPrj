@@ -4,9 +4,55 @@ import os
 import ast
 import anthropic
 from docxparser import parse_docx
-client = anthropic.Anthropic()
+client = anthropic.Anthropic(api_key="")
 
 resume_text = parse_docx("doc.docx")
+
+format_json = {
+  "name": "",
+  "contact": {
+    "location": "",
+    "phone": "",
+    "email": ""
+  },
+  "education": [
+    {
+      "institution": "",
+      "degree": "",
+      "graduation_date": "",
+      "gpa": "",
+      "relevant_coursework": []
+    }
+  ],
+  "experience": [
+    {
+      "position": "",
+      "company": "",
+      "location": "",
+      "duration": "",
+      "responsibilities": [
+        ""
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "",
+      "description": "",
+      "technologies": [
+        ""
+      ]
+    }
+  ],
+  "skills": {
+    "languages": [
+      ""
+    ],
+    "tools": [
+      ""
+    ]
+  }
+}
 
 message = client.messages.create(
     model="claude-3-7-sonnet-20250219",
@@ -20,6 +66,8 @@ message = client.messages.create(
                 {
                     "type": "text",
                     "text": "Please convert this doc into json, seperating the resume into parts such as {experience : [experience], education : [education], etc}: " + resume_text
+                    + "please make sure to fill out these fields exactly; If you are missing information leave it blank but still include the field:\n\n"
+                    +str(format_json)
                 }
             ]
         }
