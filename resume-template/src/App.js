@@ -1,8 +1,6 @@
-// resume-template/src/App.js
 import React, { useState, useEffect } from 'react';
 import './App.css';
 
-// Component imports
 import Header from './components/Header';
 import Hero from './components/Hero';
 import About from './components/About';
@@ -19,7 +17,6 @@ function App() {
   const [activeSection, setActiveSection] = useState('hero');
 
   useEffect(() => {
-    // Add timestamp to avoid caching issues
     const timestamp = new Date().getTime();
     fetch(`/data.json?t=${timestamp}`)
       .then(response => {
@@ -44,7 +41,6 @@ function App() {
       });
   }, []);
 
-  // Track section visibility for scroll-based navigation highlighting
   useEffect(() => {
     const handleScroll = () => {
       const sections = document.querySelectorAll('section[id]');
@@ -86,12 +82,10 @@ function App() {
     );
   }
 
-  // Ensure we have data
   if (!resumeData) {
     return <div className="error-container">No resume data available.</div>;
   }
 
-  // Fix any missing or null values in resumeData
   const data = {
     ...resumeData,
     name: resumeData.name || (resumeData.contact && resumeData.contact.name) || "Your Name",
