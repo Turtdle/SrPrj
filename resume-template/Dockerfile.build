@@ -1,4 +1,4 @@
-# Dockerfile for Resume Viewer
+# Dockerfile for Resume Viewer with Enhanced Portfolio
 FROM nginx:alpine
 
 # Install Node.js and npm
@@ -17,13 +17,21 @@ RUN npm install
 COPY resume-template/public ./public
 COPY resume-template/src ./src
 
+# Set environment variable to disable browser opening
+ENV BROWSER=none
+
 # Build the static site
 RUN npm run build
 
 # Copy the built files to Nginx serve directory
 RUN cp -r build/* /usr/share/nginx/html/
 
-# Copy startup script
+# Create directories for logs
+RUN mkdir -p /var/log && \
+    touch /var/log/container-startup.log /var/log/container-debug.log && \
+    chmod 666 /var/log/container-startup.log /var/log/container-debug.log
+
+# Copy our modified startup script
 COPY start-container.sh /start-container.sh
 RUN chmod +x /start-container.sh
 

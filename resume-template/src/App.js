@@ -1,35 +1,40 @@
-// resume-template/src/App.js - Simplified with robust error handling
+// resume-template/src/App.js
 import React, { useState, useEffect } from 'react';
 import './App.css';
+
+// Component imports
+import Header from './components/Header';
+import Hero from './components/Hero';
+import About from './components/About';
+import Experience from './components/Experience';
+import Projects from './components/Projects';
+import Skills from './components/Skills';
+import Contact from './components/Contact';
+import Footer from './components/Footer';
 
 function App() {
   const [resumeData, setResumeData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeSection, setActiveSection] = useState('hero');
 
   useEffect(() => {
-    console.log("App mounted, fetching data...");
-    
     // Add timestamp to avoid caching issues
     const timestamp = new Date().getTime();
     fetch(`/data.json?t=${timestamp}`)
       .then(response => {
-        console.log("Response status:", response.status);
         if (!response.ok) {
           throw new Error(`Server returned ${response.status}: ${response.statusText}`);
         }
-        return response.text(); // Get as text first to debug JSON parsing issues
+        return response.text();
       })
       .then(text => {
-        console.log("Received data (first 100 chars):", text.substring(0, 100));
         try {
           const data = JSON.parse(text);
-          console.log("Successfully parsed JSON:", data);
           setResumeData(data);
           setLoading(false);
         } catch (parseError) {
-          console.error("JSON parse error:", parseError);
-          throw new Error(`JSON parse error: ${parseError.message}. Raw data: ${text.substring(0, 100)}...`);
+          throw new Error(`JSON parse error: ${parseError.message}`);
         }
       })
       .catch(error => {
@@ -39,189 +44,88 @@ function App() {
       });
   }, []);
 
-  // Render a basic resume if we have data issues
-  const renderFallbackResume = () => {
-    // Create a basic resume structure for fallback
-    const fallbackData = {
-      name: "Resume",
-      contact: {
-        email: "example@example.com",
-        phone: "555-123-4567",
-        location: "Anytown, USA"
-      },
-      education: [
-        {
-          institution: "University Name",
-          degree: "Degree Program",
-          graduation_date: "Year",
-          gpa: "4.0"
+  // Track section visibility for scroll-based navigation highlighting
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = document.querySelectorAll('section[id]');
+      let current = '';
+      
+      sections.forEach((section) => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.clientHeight;
+        if (window.scrollY >= (sectionTop - 200)) {
+          current = section.getAttribute('id');
         }
-      ],
-      experience: [
-        {
-          position: "Position Title",
-          company: "Company Name",
-          duration: "Time Period",
-          responsibilities: ["Responsibility description"]
-        }
-      ],
-      skills: {
-        languages: ["Skill 1", "Skill 2"],
-        tools: ["Tool 1", "Tool 2"]
+      });
+      
+      if (current && current !== activeSection) {
+        setActiveSection(current);
       }
     };
 
-    return (
-      <div className="resume-container">
-        <header className="resume-header">
-          <h1>{fallbackData.name}</h1>
-          <div className="contact-info">
-            <p>{fallbackData.contact.location}</p>
-            <p>{fallbackData.contact.phone}</p>
-            <p>{fallbackData.contact.email}</p>
-          </div>
-          <div className="error-notification">
-            <p>Note: Using basic template due to data loading error.</p>
-            <p>Error: {error}</p>
-            <p><a href="/debug.html" target="_blank">View Debug Info</a></p>
-          </div>
-        </header>
-
-        {/* Basic sections */}
-        <section className="resume-section">
-          <h2>Education</h2>
-          {fallbackData.education.map((edu, index) => (
-            <div key={index} className="education-item">
-              <h3>{edu.institution}</h3>
-              <p className="degree">{edu.degree}</p>
-              <p>Graduation Date: {edu.graduation_date}</p>
-              <p>GPA: {edu.gpa}</p>
-            </div>
-          ))}
-        </section>
-
-        <section className="resume-section">
-          <h2>Experience</h2>
-          {fallbackData.experience.map((exp, index) => (
-            <div key={index} className="experience-item">
-              <div className="experience-header">
-                <h3>{exp.position}</h3>
-                <p className="company">{exp.company}</p>
-                <p className="duration">{exp.duration}</p>
-              </div>
-              <ul className="responsibilities-list">
-                {exp.responsibilities.map((resp, i) => (
-                  <li key={i}>{resp}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </section>
-
-        <section className="resume-section">
-          <h2>Skills</h2>
-          {Object.entries(fallbackData.skills).map(([category, skillsList]) => (
-            <div key={category} className="skills-category">
-              <h3>{category.charAt(0).toUpperCase() + category.slice(1)}</h3>
-              <div className="skills-list">
-                {skillsList.join(', ')}
-              </div>
-            </div>
-          ))}
-        </section>
-      </div>
-    );
-  };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [activeSection]);
 
   if (loading) {
-    return <div className="loading">Loading resume...</div>;
+    return (
+      <div className="loading">
+        <div className="loading-spinner"></div>
+        <p>Loading portfolio...</p>
+      </div>
+    );
   }
 
+  if (error) {
+    return (
+      <div className="error-container">
+        <h2>Something went wrong</h2>
+        <p>{error}</p>
+        <button onClick={() => window.location.reload()}>Try Again</button>
+      </div>
+    );
+  }
+
+  // Ensure we have data
   if (!resumeData) {
-    return renderFallbackResume();
+    return <div className="error-container">No resume data available.</div>;
   }
 
-  // Standard resume render with actual data
+  // Fix any missing or null values in resumeData
+  const data = {
+    ...resumeData,
+    name: resumeData.name || (resumeData.contact && resumeData.contact.name) || "Your Name",
+    contact: {
+      ...resumeData.contact,
+      email: (resumeData.contact && resumeData.contact.email) || "email@example.com",
+      phone: (resumeData.contact && resumeData.contact.phone) || "123-456-7890",
+      location: (resumeData.contact && resumeData.contact.location) || "City, State"
+    },
+    education: Array.isArray(resumeData.education) ? resumeData.education : [],
+    experience: Array.isArray(resumeData.experience) ? resumeData.experience : [],
+    projects: Array.isArray(resumeData.projects) ? resumeData.projects : [], 
+    skills: resumeData.skills || { languages: [], tools: [] }
+  };
+
   return (
-    <div className="resume-container">
-      <header className="resume-header">
-        <h1>{resumeData.name}</h1>
-        <div className="contact-info">
-          <p>{resumeData.contact.location}</p>
-          <p>{resumeData.contact.phone}</p>
-          <p>{resumeData.contact.email}</p>
-        </div>
-      </header>
-
-      <section className="resume-section">
-        <h2>Education</h2>
-        {resumeData.education.map((edu, index) => (
-          <div key={index} className="education-item">
-            <h3>{edu.institution}</h3>
-            <p className="degree">{edu.degree}</p>
-            <p>Graduation Date: {edu.graduation_date}</p>
-            <p>GPA: {edu.gpa}</p>
-            {edu.relevant_coursework && (
-              <div>
-                <p>Relevant Coursework:</p>
-                <ul className="coursework-list">
-                  {edu.relevant_coursework.map((course, i) => (
-                    <li key={i}>{course}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        ))}
-      </section>
-
-      <section className="resume-section">
-        <h2>Experience</h2>
-        {resumeData.experience.map((exp, index) => (
-          <div key={index} className="experience-item">
-            <div className="experience-header">
-              <h3>{exp.position}</h3>
-              <p className="company">{exp.company}</p>
-              <p className="duration">{exp.duration}</p>
-            </div>
-            <ul className="responsibilities-list">
-              {exp.responsibilities.map((resp, i) => (
-                <li key={i}>{resp}</li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </section>
-
-      {resumeData.projects && (
-        <section className="resume-section">
-          <h2>Projects</h2>
-          {resumeData.projects.map((project, index) => (
-            <div key={index} className="project-item">
-              <h3>{project.name}</h3>
-              <p>{project.description}</p>
-              {project.technologies && (
-                <div className="technologies">
-                  <span>Technologies: </span>
-                  {project.technologies.join(', ')}
-                </div>
-              )}
-            </div>
-          ))}
-        </section>
-      )}
-
-      <section className="resume-section">
-        <h2>Skills</h2>
-        {resumeData.skills && Object.entries(resumeData.skills).map(([category, skillsList]) => (
-          <div key={category} className="skills-category">
-            <h3>{category.charAt(0).toUpperCase() + category.slice(1)}</h3>
-            <div className="skills-list">
-              {skillsList.join(', ')}
-            </div>
-          </div>
-        ))}
-      </section>
+    <div className="portfolio-app">
+      <Header name={data.name} activeSection={activeSection} />
+      
+      <main>
+        <Hero name={data.name} education={data.education} />
+        
+        <About name={data.name} education={data.education} contact={data.contact} />
+        
+        <Experience experiences={data.experience} />
+        
+        <Projects projects={data.projects} />
+        
+        <Skills skills={data.skills} />
+        
+        <Contact contact={data.contact} />
+      </main>
+      
+      <Footer name={data.name} />
     </div>
   );
 }
