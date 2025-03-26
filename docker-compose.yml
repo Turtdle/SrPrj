@@ -16,8 +16,7 @@ services:
     restart: unless-stopped
     container_name: resume-generator-main
 
-  # The resume-viewer-builder service is now commented out
-  # It will be built and used by the main service only when needed
+  #DASJOVWEJVAEIJPEWNHRIAERNEREP
   #resume-viewer-builder:
   #  build:
   #    context: .

@@ -1,12 +1,9 @@
-#!/bin/sh
 
-# Create log files
 LOGFILE="/var/log/container-startup.log"
 DEBUG_FILE="/var/log/container-debug.log"
 touch $LOGFILE $DEBUG_FILE
 chmod 666 $LOGFILE $DEBUG_FILE
 
-# Log function
 log() {
   echo "[$(date)] $1" | tee -a $LOGFILE
 }
@@ -19,7 +16,6 @@ log "===== CONTAINER STARTUP DEBUG ====="
 log "Container started with the following environment:"
 env | grep -v PASSWORD | grep -v KEY | sort >> $LOGFILE
 
-# Create complete filesystem inventory for debugging
 debug "Creating complete inventory of filesystem:"
 find / -type f -name "*.json" 2>/dev/null | tee -a $DEBUG_FILE
 debug "All mounted volumes:"
@@ -33,7 +29,6 @@ pwd | tee -a $DEBUG_FILE
 debug "Current directory contents:"
 ls -la | tee -a $DEBUG_FILE
 
-# Check for data.json in multiple locations with very detailed diagnostics
 log "Searching for data.json in various locations:"
 debug "Starting search for data.json files..."
 
@@ -41,7 +36,6 @@ for location in "/app/data.json" "/data.json" "/app/data/data.json" "data.json" 
   log "Checking $location"
   debug "Checking location: $location"
   
-  # Check if directory exists
   dir=$(dirname "$location")
   if [ -d "$dir" ]; then
     debug "Directory $dir exists"
@@ -66,7 +60,6 @@ for location in "/app/data.json" "/data.json" "/app/data/data.json" "data.json" 
     head -c 100 "$location" | tee -a $LOGFILE
     log ""
     
-    # Validate JSON structure
     debug "Validating JSON structure:"
     if cat "$location" | grep -q "^{.*}$"; then
       debug "File appears to be valid JSON (basic check)"
@@ -82,7 +75,6 @@ for location in "/app/data.json" "/data.json" "/app/data/data.json" "data.json" 
   fi
 done
 
-# If not found, look throughout the filesystem
 if [ -z "$DATA_JSON_PATH" ]; then
   log "Searching entire container for data.json..."
   debug "DATA_JSON_PATH is empty, performing filesystem search"
@@ -109,7 +101,6 @@ if [ -z "$DATA_JSON_PATH" ]; then
       log ""
     done
     
-    # Use the first found file
     DATA_JSON_PATH=$(echo "$FOUND_FILES" | head -n 1)
     log "Using first found location: $DATA_JSON_PATH"
     debug "Selected DATA_JSON_PATH: $DATA_JSON_PATH"
@@ -119,7 +110,6 @@ if [ -z "$DATA_JSON_PATH" ]; then
   fi
 fi
 
-# If still not found, create a placeholder
 if [ -z "$DATA_JSON_PATH" ]; then
   log "Creating a placeholder data.json"
   debug "DATA_JSON_PATH is still empty, creating placeholder"
@@ -131,7 +121,6 @@ else
   debug "Using data.json found at $DATA_JSON_PATH"
 fi
 
-# Check destination directory
 log "Checking destination directory:"
 debug "Checking destination directory /usr/share/nginx/html"
 
@@ -151,7 +140,6 @@ else
   debug "Directory created, result: $?"
 fi
 
-# Copy resume data to the web directory with verbose output
 log "Copying data.json to web directory"
 debug "Copying from $DATA_JSON_PATH to /usr/share/nginx/html/data.json"
 cp -v "$DATA_JSON_PATH" /usr/share/nginx/html/data.json 2>&1 | tee -a $LOGFILE $DEBUG_FILE
@@ -167,7 +155,6 @@ else
   debug "Source file is readable: $([ -r "$DATA_JSON_PATH" ] && echo "Yes" || echo "No")"
   debug "Destination is writable: $([ -w "/usr/share/nginx/html/" ] && echo "Yes" || echo "No")"
   
-  # Try alternate methods
   log "Trying cat method instead"
   debug "Trying alternate copy method using cat"
   cat "$DATA_JSON_PATH" > /usr/share/nginx/html/data.json 2>&1 | tee -a $LOGFILE $DEBUG_FILE
@@ -180,7 +167,6 @@ else
   fi
 fi
 
-# Ensure proper permissions
 log "Setting file permissions"
 debug "Setting permissions on /usr/share/nginx/html/data.json"
 chmod 644 /usr/share/nginx/html/data.json 2>&1 | tee -a $LOGFILE $DEBUG_FILE
@@ -193,7 +179,6 @@ else
   debug "Permission change failed with exit code $?"
 fi
 
-# Debug: Verify the copy worked
 log "Verifying the copy worked:"
 debug "Verifying copy"
 
@@ -212,7 +197,6 @@ if [ -f "/usr/share/nginx/html/data.json" ]; then
   head -c 500 /usr/share/nginx/html/data.json | tee -a $DEBUG_FILE
   log "..."
   
-  # Check for key fields in the JSON that would indicate it's the placeholder
   debug "Checking if file contains placeholder markers"
   if grep -q "Test User" /usr/share/nginx/html/data.json; then
     debug "WARNING: File appears to contain placeholder data (contains 'Test User')"
@@ -222,7 +206,6 @@ if [ -f "/usr/share/nginx/html/data.json" ]; then
     debug "WARNING: File appears to contain placeholder data (contains 'test@example.com')"
   fi
   
-  # Check if the file contains the actual data
   if grep -q "sam@wanfamily.org" /usr/share/nginx/html/data.json; then
     debug "GOOD: File appears to contain actual resume data (contains 'sam@wanfamily.org')"
   fi
@@ -234,7 +217,6 @@ else
   debug "Emergency fallback created: $?"
 fi
 
-# Create an enhanced debug page
 log "Creating debug page"
 debug "Creating enhanced debug page"
 
@@ -431,27 +413,23 @@ cat > /usr/share/nginx/html/debug.html << EOF
 </html>
 EOF
 
-# Copy the log files to locations accessible by nginx
 log "Making log files accessible via web"
 debug "Making log files accessible via web"
 cp $LOGFILE /usr/share/nginx/html/container-startup.log
 cp $DEBUG_FILE /usr/share/nginx/html/container-debug.log
 chmod 644 /usr/share/nginx/html/container-startup.log /usr/share/nginx/html/container-debug.log
 
-# Run a find for data.json and write to a file
 log "Finding all data.json files in the container"
 debug "Finding all data.json files in the container"
 find / -name "data.json" -type f 2>/dev/null > /usr/share/nginx/html/data-files.txt
 chmod 644 /usr/share/nginx/html/data-files.txt
 
-# Create a backup copy of the data.json with timestamp
 if [ -f "/usr/share/nginx/html/data.json" ]; then
   TIMESTAMP=$(date +%Y%m%d%H%M%S)
   cp /usr/share/nginx/html/data.json /usr/share/nginx/html/data.json.${TIMESTAMP}
   debug "Created backup copy at data.json.${TIMESTAMP}"
 fi
 
-# Start nginx
 log "Starting nginx..."
 debug "Starting nginx..."
 nginx -g "daemon off;"

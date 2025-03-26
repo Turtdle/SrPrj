@@ -1,7 +1,4 @@
 #!/bin/bash
-# Save this as container-debug.sh in your project root and make it executable with chmod +x container-debug.sh
-
-# Get the container ID from command line argument or use the most recent resume container
 CONTAINER_ID=$1
 if [ -z "$CONTAINER_ID" ]; then
     CONTAINER_ID=$(docker ps | grep resume- | head -n 1 | awk '{print $1}')
