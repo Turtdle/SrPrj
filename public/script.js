@@ -32,13 +32,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     async function handleFiles(files) {
-        const file = files[0]; // Handle first file only
+        const file = files[0]; 
         console.log('File received:', file.name);
         
-        // Reset drop zone to original state
+
         dropZone.innerHTML = `<p>Drag & Drop files here or click to upload</p>`;
-        
-        // Check if file is a .docx file
+
         if (!file.name.endsWith('.docx')) {
             resultArea.innerHTML = `<p style="color: red;">Please upload a .docx file</p>`;
             return;
@@ -46,12 +45,12 @@ document.addEventListener('DOMContentLoaded', () => {
         
         resultArea.innerHTML = `<p>Processing ${file.name}...</p>`;
         
-        // Create form data and append file
+
         const formData = new FormData();
         formData.append('docxFile', file);
         
         try {
-            // Send to server endpoint
+
             const response = await fetch('/upload', {
                 method: 'POST',
                 body: formData

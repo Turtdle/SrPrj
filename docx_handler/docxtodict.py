@@ -67,7 +67,7 @@ message = client.messages.create(
                     "type": "text",
                     "text": "Please convert this doc into json, seperating the resume into parts such as {experience : [experience], education : [education], etc}: " + resume_text
                     + "please make sure to fill out these fields exactly; If you are missing information leave it blank but still include the field:\n\n"
-                    +str(format_json)
+                    + str(format_json)
                 }
             ]
         }

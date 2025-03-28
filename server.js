@@ -153,15 +153,10 @@ app.post('/upload', upload.single('docxFile'), async (req, res) => {
             
 
             const uniqueContainerName = `resume-${containerId}`;
-            
+            //d
             const dockerRunCmd = `
-            # First run the container
             docker run -d -p ${containerPort}:80 --name ${uniqueContainerName} resume-viewer && 
-            
-            # Then copy the data.json file directly into the container
             docker cp ${path.join(containerDir, 'data.json')} ${uniqueContainerName}:/usr/share/nginx/html/data.json && 
-            
-            # Make sure it has the right permissions
             docker exec ${uniqueContainerName} chmod 644 /usr/share/nginx/html/data.json
             `;
 
