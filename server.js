@@ -8,9 +8,17 @@ const { v4: uuidv4 } = require('uuid');
 const app = express();
 const port = 3000;
 
+// a
+let imageChecked = false;
 
 function ensureResumeViewerImageExists() {
     return new Promise((resolve, reject) => {
+      if (imageChecked) {
+        console.log('Resume viewer image already verified');
+        resolve();
+        return;
+      }
+      
       exec('docker image inspect resume-viewer', (error) => {
         if (error) {
           console.log('Resume viewer image not found, building it now...');
@@ -20,11 +28,13 @@ function ensureResumeViewerImageExists() {
               reject(buildError);
             } else {
               console.log('Successfully built resume-viewer image');
+              imageChecked = true;
               resolve();
             }
           });
         } else {
           console.log('Resume viewer image already exists');
+          imageChecked = true;
           resolve();
         }
       });
@@ -40,7 +50,7 @@ function findPythonInterpreter() {
         path.join(__dirname, '.venv', 'bin', 'python3'),
         path.join(__dirname, '.venv', 'bin', 'python'),
         path.join(__dirname, '.venv', 'Scripts', 'python.exe'),
-    ].filter(Boolean); // Remove null entries
+    ].filter(Boolean);
     
     for (const pythonPath of possiblePaths) {
         try {
@@ -73,13 +83,21 @@ const upload = multer({ dest: 'uploads/' });
 
 const activeContainers = {};
 
-app.post('/upload', upload.single('docxFile'), (req, res) => {
+app.post('/upload', upload.single('docxFile'), async (req, res) => {
     if (!req.file) {
         return res.status(400).send('No file uploaded');
     }
 
     if (!req.file.originalname.endsWith('.docx')) {
         return res.status(400).send('Please upload a .docx file');
+    }
+
+
+    try {
+        await ensureResumeViewerImageExists();
+    } catch (error) {
+        console.error('Failed to ensure resume-viewer image exists:', error);
+        return res.status(500).send('Error preparing container image');
     }
 
     const docxPath = req.file.path;
@@ -128,59 +146,62 @@ app.post('/upload', upload.single('docxFile'), (req, res) => {
         console.log(`Document processed: ${stdout}`);
         
         console.log(`Making data.json accessible...`);
-exec(`chmod -R 755 ${containerDir}`, (chmodError) => {
-    if (chmodError) {
-        console.error(`Warning: chmod failed: ${chmodError.message}`);
-    }
-    
-    const dockerRunCmd = `
-    # First run the container
-    docker run -d -p ${containerPort}:80 --name resume-${containerId} resume-viewer && 
-    
-    # Then copy the data.json file directly into the container
-    docker cp ${path.join(containerDir, 'data.json')} resume-${containerId}:/usr/share/nginx/html/data.json && 
-    
-    # Make sure it has the right permissions
-    docker exec resume-${containerId} chmod 644 /usr/share/nginx/html/data.json
-`;
+        exec(`chmod -R 755 ${containerDir}`, (chmodError) => {
+            if (chmodError) {
+                console.error(`Warning: chmod failed: ${chmodError.message}`);
+            }
+            
 
-console.log(`Executing Docker command: ${dockerRunCmd}`);
-const dataJsonPath = path.join(containerDir, 'data.json');
-if (!fs.existsSync(dataJsonPath)) {
-    console.error(`Error: data.json not found at ${dataJsonPath}`);
-    return res.status(500).send('Error: Resume data not found');
-}
+            const uniqueContainerName = `resume-${containerId}`;
+            
+            const dockerRunCmd = `
+            # First run the container
+            docker run -d -p ${containerPort}:80 --name ${uniqueContainerName} resume-viewer && 
+            
+            # Then copy the data.json file directly into the container
+            docker cp ${path.join(containerDir, 'data.json')} ${uniqueContainerName}:/usr/share/nginx/html/data.json && 
+            
+            # Make sure it has the right permissions
+            docker exec ${uniqueContainerName} chmod 644 /usr/share/nginx/html/data.json
+            `;
 
-const fileSize = fs.statSync(dataJsonPath).size;
-if (fileSize === 0) {
-    console.error(`Error: data.json is empty (0 bytes)`);
-    return res.status(500).send('Error: Resume data is empty');
-}
+            console.log(`Executing Docker command: ${dockerRunCmd}`);
+            const dataJsonPath = path.join(containerDir, 'data.json');
+            if (!fs.existsSync(dataJsonPath)) {
+                console.error(`Error: data.json not found at ${dataJsonPath}`);
+                return res.status(500).send('Error: Resume data not found');
+            }
 
-console.log(`Verified data.json exists (${fileSize} bytes)`);
+            const fileSize = fs.statSync(dataJsonPath).size;
+            if (fileSize === 0) {
+                console.error(`Error: data.json is empty (0 bytes)`);
+                return res.status(500).send('Error: Resume data is empty');
+            }
 
-const previewContent = fs.readFileSync(dataJsonPath, 'utf8').substring(0, 100);
-console.log(`Data preview: ${previewContent}...`);
-exec(dockerRunCmd, (error, stdout, stderr) => {
-    if (error) {
-        console.error(`Error with Docker commands: ${error.message}`);
-        console.error(`Docker stderr: ${stderr}`);
-        return res.status(500).send('Error launching container');
-    }
-    
-    activeContainers[containerId] = {
-        id: stdout.trim(),
-        port: containerPort,
-        createdAt: new Date()
-    };
-    
-    res.json({
-        success: true,
-        containerId: containerId,
-        url: `http://localhost:${containerPort}`
-    });
-});
-});
+            console.log(`Verified data.json exists (${fileSize} bytes)`);
+
+            const previewContent = fs.readFileSync(dataJsonPath, 'utf8').substring(0, 100);
+            console.log(`Data preview: ${previewContent}...`);
+            exec(dockerRunCmd, (error, stdout, stderr) => {
+                if (error) {
+                    console.error(`Error with Docker commands: ${error.message}`);
+                    console.error(`Docker stderr: ${stderr}`);
+                    return res.status(500).send('Error launching container');
+                }
+                
+                activeContainers[containerId] = {
+                    id: stdout.trim(),
+                    port: containerPort,
+                    createdAt: new Date()
+                };
+                
+                res.json({
+                    success: true,
+                    containerId: containerId,
+                    url: `http://localhost:${containerPort}`
+                });
+            });
+        });
     });
 });
 
@@ -200,7 +221,7 @@ setInterval(() => {
     const now = new Date();
     Object.entries(activeContainers).forEach(([id, container]) => {
         const hoursSinceCreation = (now - container.createdAt) / (1000 * 60 * 60);
-        if (hoursSinceCreation > 24) { // Remove containers older than 24 hours
+        if (hoursSinceCreation > 24) { 
             exec(`docker stop resume-${id} && docker rm resume-${id}`, (error) => {
                 if (!error) {
                     delete activeContainers[id];
