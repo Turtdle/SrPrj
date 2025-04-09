@@ -1,11 +1,10 @@
-// resume-template/src/components/About.js
+
 import React from 'react';
 
 const About = ({ name, education, contact }) => {
-  // Extract first name
   const firstName = name.split(' ')[0];
   
-  // Get education details
+
   const universityEducation = education && education.length > 0 ? education[0] : null;
   
   return (
