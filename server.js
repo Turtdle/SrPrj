@@ -8,33 +8,46 @@ const { v4: uuidv4 } = require('uuid');
 const app = express();
 const port = 3000;
 
-// a
-let imageChecked = false;
+// Track if resume viewer images have been checked
+let standardImageChecked = false;
+let professionalImageChecked = false;
 
-function ensureResumeViewerImageExists() {
+function ensureResumeViewerImageExists(template) {
+    const imageName = template === 'professional' ? 'resume-viewer-professional' : 'resume-viewer';
+    const imageChecked = template === 'professional' ? professionalImageChecked : standardImageChecked;
+    const dockerfilePath = template === 'professional' ? 'resume-template/Dockerfile.professional' : 'resume-template/Dockerfile.build';
+    
     return new Promise((resolve, reject) => {
       if (imageChecked) {
-        console.log('Resume viewer image already verified');
+        console.log(`${imageName} image already verified`);
         resolve();
         return;
       }
       
-      exec('docker image inspect resume-viewer', (error) => {
+      exec(`docker image inspect ${imageName}`, (error) => {
         if (error) {
-          console.log('Resume viewer image not found, building it now...');
-          exec('docker build -t resume-viewer -f resume-template/Dockerfile.build .', (buildError, stdout, stderr) => {
+          console.log(`${imageName} image not found, building it now...`);
+          exec(`docker build -t ${imageName} -f ${dockerfilePath} .`, (buildError, stdout, stderr) => {
             if (buildError) {
-              console.error('Error building resume-viewer image:', stderr);
+              console.error(`Error building ${imageName} image:`, stderr);
               reject(buildError);
             } else {
-              console.log('Successfully built resume-viewer image');
-              imageChecked = true;
+              console.log(`Successfully built ${imageName} image`);
+              if (template === 'professional') {
+                professionalImageChecked = true;
+              } else {
+                standardImageChecked = true;
+              }
               resolve();
             }
           });
         } else {
-          console.log('Resume viewer image already exists');
-          imageChecked = true;
+          console.log(`${imageName} image already exists`);
+          if (template === 'professional') {
+            professionalImageChecked = true;
+          } else {
+            standardImageChecked = true;
+          }
           resolve();
         }
       });
@@ -77,6 +90,28 @@ function findPythonInterpreter() {
 
 const PYTHON_PATH = findPythonInterpreter();
 
+// Create directory for template preview images
+const previewDir = path.join(__dirname, 'public', 'img');
+if (!fs.existsSync(previewDir)) {
+    fs.mkdirSync(previewDir, { recursive: true });
+}
+
+// Create basic placeholder preview images if they don't exist
+const standardPreview = path.join(previewDir, 'template-standard.png');
+const professionalPreview = path.join(previewDir, 'template-professional.png');
+
+// This is a simple function to create a placeholder image file if it doesn't exist
+function createPlaceholderImageIfNeeded(filePath, content) {
+    if (!fs.existsSync(filePath)) {
+        console.log(`Creating placeholder image at ${filePath}`);
+        fs.writeFileSync(filePath, content || 'PLACEHOLDER');
+    }
+}
+
+createPlaceholderImageIfNeeded(standardPreview);
+createPlaceholderImageIfNeeded(professionalPreview);
+
+// Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
 const upload = multer({ dest: 'uploads/' });
@@ -92,9 +127,12 @@ app.post('/upload', upload.single('docxFile'), async (req, res) => {
         return res.status(400).send('Please upload a .docx file');
     }
 
+    // Get selected template (default to standard if not specified)
+    const selectedTemplate = req.body.template || 'standard';
+    console.log(`Selected template: ${selectedTemplate}`);
 
     try {
-        await ensureResumeViewerImageExists();
+        await ensureResumeViewerImageExists(selectedTemplate);
     } catch (error) {
         console.error('Failed to ensure resume-viewer image exists:', error);
         return res.status(500).send('Error preparing container image');
@@ -151,16 +189,17 @@ app.post('/upload', upload.single('docxFile'), async (req, res) => {
                 console.error(`Warning: chmod failed: ${chmodError.message}`);
             }
             
-
+            // Set the correct image name based on template
+            const imageName = selectedTemplate === 'professional' ? 'resume-viewer-professional' : 'resume-viewer';
             const uniqueContainerName = `resume-${containerId}`;
-            //d
+            
             const dockerRunCmd = `
-            docker run -d -p ${containerPort}:80 --name ${uniqueContainerName} resume-viewer && 
+            docker run -d -p ${containerPort}:80 --name ${uniqueContainerName} ${imageName} && 
             docker cp ${path.join(containerDir, 'data.json')} ${uniqueContainerName}:/usr/share/nginx/html/data.json && 
             docker exec ${uniqueContainerName} chmod 644 /usr/share/nginx/html/data.json
             `;
 
-            console.log(`Executing Docker command: ${dockerRunCmd}`);
+            console.log(`Executing Docker command with image ${imageName}: ${dockerRunCmd}`);
             const dataJsonPath = path.join(containerDir, 'data.json');
             if (!fs.existsSync(dataJsonPath)) {
                 console.error(`Error: data.json not found at ${dataJsonPath}`);
@@ -187,13 +226,15 @@ app.post('/upload', upload.single('docxFile'), async (req, res) => {
                 activeContainers[containerId] = {
                     id: stdout.trim(),
                     port: containerPort,
-                    createdAt: new Date()
+                    createdAt: new Date(),
+                    template: selectedTemplate
                 };
                 
                 res.json({
                     success: true,
                     containerId: containerId,
-                    url: `http://localhost:${containerPort}`
+                    url: `http://localhost:${containerPort}`,
+                    template: selectedTemplate
                 });
             });
         });
@@ -205,7 +246,8 @@ app.get('/container/:id', (req, res) => {
     if (activeContainers[containerId]) {
         res.json({
             active: true,
-            url: `http://localhost:${activeContainers[containerId].port}`
+            url: `http://localhost:${activeContainers[containerId].port}`,
+            template: activeContainers[containerId].template
         });
     } else {
         res.json({ active: false });

@@ -1,14 +1,15 @@
 #!/bin/bash
+set -e
+
+echo "Setting up resume templates..."
 
 # Create necessary directories
 mkdir -p mini_website/templates
 mkdir -p mini_website/static/css
 mkdir -p public/img
 
-# Copy template files
-echo "Creating professional template files..."
-
-# Save the professional template HTML
+# Create professional template HTML
+echo "Creating professional template HTML..."
 cat > mini_website/templates/professional.html << 'EOL'
 <!DOCTYPE html>
 <html lang="en">
@@ -204,7 +205,8 @@ cat > mini_website/templates/professional.html << 'EOL'
 </html>
 EOL
 
-# Save the professional CSS
+# Create professional CSS
+echo "Creating professional CSS..."
 cat > mini_website/static/css/professional.css << 'EOL'
 /* professional.css */
 :root {
@@ -646,7 +648,8 @@ footer p {
 }
 EOL
 
-# Create the Dockerfile for professional template
+# Create Dockerfile for the professional template
+echo "Creating Dockerfile for the professional template..."
 cat > resume-template/Dockerfile.professional << 'EOL'
 FROM nginx:alpine
 
@@ -716,16 +719,20 @@ EXPOSE 80
 CMD ["/start.sh"]
 EOL
 
-# Create sample template preview images with base64 content
-# Standard template preview
+# Create simple template preview images
+echo "Creating template preview images..."
+mkdir -p public/img
 cat > public/img/template-standard.png << 'EOL'
-iVBORw0KGgoAAAANSUhEUgAAAQAAAADwCAYAAADvl7rLAAAAEXRFWHRTb2Z0d2FyZQBTbmlwYXN0ZV0AAAAaSURBVHja7cExAQAAAMKg9U9tDQ+gAAAAAAAAbjIUAAFiD0FEAAAAASUVORK5CYII=
+iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==
 EOL
 
-# Professional template preview
 cat > public/img/template-professional.png << 'EOL'
-iVBORw0KGgoAAAANSUhEUgAAAQAAAADwCAYAAADvl7rLAAAAEXRFWHRTb2Z0d2FyZQBTbmlwYXN0ZV0AAAAaSURBVHja7cExAQAAAMKg9U9tDQ+gAAAAAAAAbjIUAAFiD0FEAAAAASUVORK5CYII=
+iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPj/HwADBwIAMCbHYQAAAABJRU5ErkJggg==
 EOL
 
-echo "Template files created successfully!"
-echo "Remember to make the script executable with: chmod +x install-templates.sh"
+# Build Docker images
+#echo "Building Docker images..."
+#docker build -t resume-viewer -f resume-template/Dockerfile.build .
+#docker build -t resume-viewer-professional -f resume-template/Dockerfile.professional .
+
+echo "Setup complete! Both templates are now ready to use."
