@@ -5,35 +5,14 @@ RUN apk add --update python3 py3-pip py3-flask py3-werkzeug bash
 
 WORKDIR /app
 
-# Create directory structure
+# Create directory structure 
 RUN mkdir -p /app/templates /app/static/css /app/static/js /var/log
 
 # Copy the professional template files
 COPY mini_website/templates/professional.html /app/templates/
 COPY mini_website/static/css/professional.css /app/static/css/
 
-# Create a proper startup script with debugging
-RUN echo '#!/bin/bash\n\
-set -e\n\
-\n\
-echo "Starting container..."\n\
-\n\
-# Create directories and files if needed\n\
-mkdir -p /usr/share/nginx/html\n\
-touch /usr/share/nginx/html/data.json\n\
-chmod 644 /usr/share/nginx/html/data.json\n\
-echo "{\\"name\\":\\"Placeholder\\",\\"contact\\":{\\"email\\":\\"example@example.com\\"}}" > /usr/share/nginx/html/data.json\n\
-\n\
-echo "Starting Flask app..."\n\
-python3 /app/app.py > /var/log/flask.log 2>&1 &\n\
-FLASK_PID=$!\n\
-sleep 2\n\
-\n\
-echo "Starting Nginx..."\n\
-exec nginx -g "daemon off;"\n\
-' > /start.sh && chmod +x /start.sh
-
-# Create a simple Flask app for the template
+# Create app.py - simple Flask app for the template
 RUN echo 'from flask import Flask, render_template, jsonify\n\
 import json\n\
 import datetime\n\
@@ -45,18 +24,28 @@ app = Flask(__name__)\n\
 def index():\n\
     try:\n\
         data_file = "/usr/share/nginx/html/data.json"\n\
+        print(f"Looking for data file at: {data_file}")\n\
+        \n\
         if not os.path.exists(data_file):\n\
-            return jsonify({"error": "Resume data not found"}), 404\n\
+            print(f"Data file not found at {data_file}")\n\
+            data_file = "/data.json"\n\
+            if os.path.exists(data_file):\n\
+                print(f"Found data at alternate location: {data_file}")\n\
+            else:\n\
+                return jsonify({"error": "Resume data not found"}), 404\n\
             \n\
         with open(data_file, "r") as f:\n\
             resume_data = json.load(f)\n\
+            print(f"Loaded resume data: {resume_data.keys()}")\n\
         \n\
         return render_template("professional.html", resume=resume_data, now=datetime.datetime.now())\n\
     except Exception as e:\n\
+        print(f"Error: {str(e)}")\n\
         return jsonify({"error": str(e)}), 500\n\
 \n\
 if __name__ == "__main__":\n\
-    app.run(host="0.0.0.0", port=5000)\n\
+    print("Starting Flask app on port 5000")\n\
+    app.run(host="0.0.0.0", port=5000, debug=True)\n\
 ' > /app/app.py
 
 # Configure Nginx to proxy requests to the Flask app
@@ -76,8 +65,53 @@ RUN echo 'server {\n\
     \n\
     location /data.json {\n\
         root /usr/share/nginx/html;\n\
+        add_header Content-Type application/json;\n\
     }\n\
 }' > /etc/nginx/conf.d/default.conf
+
+# Create startup script with better error handling
+RUN echo '#!/bin/bash\n\
+set -e\n\
+\n\
+echo "Starting container..."\n\
+mkdir -p /usr/share/nginx/html\n\
+\n\
+# Look for data.json in various locations\n\
+for loc in "/data.json" "/app/data.json" "/usr/share/nginx/html/data.json"; do\n\
+    if [ -f "$loc" ]; then\n\
+        echo "Found data.json at $loc"\n\
+        cp -v "$loc" /usr/share/nginx/html/data.json\n\
+        break\n\
+    fi\n\
+done\n\
+\n\
+# If we still dont have data.json, create a placeholder\n\
+if [ ! -f "/usr/share/nginx/html/data.json" ]; then\n\
+    echo "Creating placeholder data.json"\n\
+    echo "{\\"name\\":\\"Placeholder Name\\",\\"contact\\":{\\"email\\":\\"example@example.com\\",\\"phone\\":\\"555-555-5555\\",\\"location\\":\\"Somewhere, USA\\"},\\"education\\":[{\\"institution\\":\\"University\\",\\"degree\\":\\"Degree\\",\\"graduation_date\\":\\"2025\\",\\"gpa\\":\\"4.0\\",\\"relevant_coursework\\":[]}],\\"experience\\":[{\\"position\\":\\"Position\\",\\"company\\":\\"Company\\",\\"location\\":\\"Location\\",\\"duration\\":\\"Duration\\",\\"responsibilities\\":[]}],\\"projects\\":[],\\"skills\\":{\\"languages\\":[],\\"tools\\":[]}}"\n\
+         > /usr/share/nginx/html/data.json\n\
+fi\n\
+\n\
+chmod 644 /usr/share/nginx/html/data.json\n\
+cat /usr/share/nginx/html/data.json | head -10\n\
+\n\
+echo "Starting Flask app..."\n\
+cd /app && python3 app.py > /var/log/flask.log 2>&1 &\n\
+FLASK_PID=$!\n\
+sleep 2\n\
+\n\
+if ! ps -p $FLASK_PID > /dev/null; then\n\
+    echo "Flask app failed to start. Here are the logs:"\n\
+    cat /var/log/flask.log\n\
+    exit 1\n\
+fi\n\
+\n\
+echo "Flask app started successfully (PID: $FLASK_PID)"\n\
+echo "Starting Nginx..."\n\
+nginx -g "daemon off;"\n\
+' > /start.sh
+
+RUN chmod +x /start.sh
 
 EXPOSE 80
 
