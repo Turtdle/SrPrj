@@ -1,8 +1,7 @@
 FROM nginx:alpine
 
-# Install Python and Flask for template rendering
-RUN apk add --update python3 py3-pip
-RUN pip3 install flask Werkzeug
+# Install Python and Flask using Alpine package manager
+RUN apk add --update python3 py3-pip py3-flask py3-werkzeug
 
 WORKDIR /app
 
