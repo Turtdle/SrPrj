@@ -118,6 +118,19 @@ const upload = multer({ dest: 'uploads/' });
 
 const activeContainers = {};
 
+// Helper function to execute Docker commands with a promise
+function execPromise(command) {
+  return new Promise((resolve, reject) => {
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        reject({ error, stderr });
+      } else {
+        resolve(stdout);
+      }
+    });
+  });
+}
+
 app.post('/upload', upload.single('docxFile'), async (req, res) => {
     if (!req.file) {
         return res.status(400).send('No file uploaded');
@@ -168,77 +181,79 @@ app.post('/upload', upload.single('docxFile'), async (req, res) => {
     
     console.log(`Executing command: ${pythonCmd}`);
     
-    exec(pythonCmd, {
-        env: {
-            ...process.env,
-            PATH: process.env.PATH
-        }
-    }, (error, stdout, stderr) => {
-        if (error) {
-            console.error(`Error processing document: ${error.message}`);
-            console.error(`stdout: ${stdout}`);
-            console.error(`stderr: ${stderr}`);
-            return res.status(500).send('Error processing document');
-        }
-        
-        console.log(`Document processed: ${stdout}`);
-        
-        console.log(`Making data.json accessible...`);
-        exec(`chmod -R 755 ${containerDir}`, (chmodError) => {
-            if (chmodError) {
-                console.error(`Warning: chmod failed: ${chmodError.message}`);
-            }
-            
-            // Set the correct image name based on template
-            const imageName = selectedTemplate === 'professional' ? 'resume-viewer-professional' : 'resume-viewer';
-            const uniqueContainerName = `resume-${containerId}`;
-            
-            const dockerRunCmd = `
-            docker run -d -p ${containerPort}:80 --name ${uniqueContainerName} ${imageName} && 
-            docker cp ${path.join(containerDir, 'data.json')} ${uniqueContainerName}:/usr/share/nginx/html/data.json && 
-            docker exec ${uniqueContainerName} chmod 644 /usr/share/nginx/html/data.json
-            `;
+    try {
+        const pythonOutput = await execPromise(pythonCmd);
+        console.log(`Document processed: ${pythonOutput}`);
 
-            console.log(`Executing Docker command with image ${imageName}: ${dockerRunCmd}`);
+        console.log(`Making data.json accessible...`);
+        await execPromise(`chmod -R 755 ${containerDir}`);
+            
+        // Set the correct image name based on template
+        const imageName = selectedTemplate === 'professional' ? 'resume-viewer-professional' : 'resume-viewer';
+        const uniqueContainerName = `resume-${containerId}`;
+            
+        // Changed workflow: First run the container, then wait to ensure it's stable before copying data
+        console.log(`Starting Docker container with image ${imageName}...`);
+        const containerOutput = await execPromise(`docker run -d -p ${containerPort}:80 --name ${uniqueContainerName} ${imageName}`);
+        const containerId2 = containerOutput.trim();
+        
+        // Wait to make sure container is stable (2 seconds)
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Check if container is still running
+        console.log("Checking if container is running...");
+        try {
+            await execPromise(`docker inspect --format='{{.State.Running}}' ${uniqueContainerName}`);
+            console.log("Container is running, proceeding with data copy");
+            
             const dataJsonPath = path.join(containerDir, 'data.json');
             if (!fs.existsSync(dataJsonPath)) {
-                console.error(`Error: data.json not found at ${dataJsonPath}`);
-                return res.status(500).send('Error: Resume data not found');
+                throw new Error(`data.json not found at ${dataJsonPath}`);
             }
 
             const fileSize = fs.statSync(dataJsonPath).size;
             if (fileSize === 0) {
-                console.error(`Error: data.json is empty (0 bytes)`);
-                return res.status(500).send('Error: Resume data is empty');
+                throw new Error(`data.json is empty (0 bytes)`);
             }
 
             console.log(`Verified data.json exists (${fileSize} bytes)`);
-
-            const previewContent = fs.readFileSync(dataJsonPath, 'utf8').substring(0, 100);
-            console.log(`Data preview: ${previewContent}...`);
-            exec(dockerRunCmd, (error, stdout, stderr) => {
-                if (error) {
-                    console.error(`Error with Docker commands: ${error.message}`);
-                    console.error(`Docker stderr: ${stderr}`);
-                    return res.status(500).send('Error launching container');
-                }
-                
-                activeContainers[containerId] = {
-                    id: stdout.trim(),
-                    port: containerPort,
-                    createdAt: new Date(),
-                    template: selectedTemplate
-                };
-                
-                res.json({
-                    success: true,
-                    containerId: containerId,
-                    url: `http://localhost:${containerPort}`,
-                    template: selectedTemplate
-                });
+            console.log(`Copying data.json to container...`);
+            
+            // Copy data.json to container
+            await execPromise(`docker cp ${dataJsonPath} ${uniqueContainerName}:/usr/share/nginx/html/data.json`);
+            
+            // Set correct permissions
+            await execPromise(`docker exec ${uniqueContainerName} chmod 644 /usr/share/nginx/html/data.json`);
+            
+            // Store container info for later use
+            activeContainers[containerId] = {
+                id: containerId2,
+                port: containerPort,
+                createdAt: new Date(),
+                template: selectedTemplate
+            };
+            
+            res.json({
+                success: true,
+                containerId: containerId,
+                url: `http://localhost:${containerPort}`,
+                template: selectedTemplate
             });
-        });
-    });
+        } catch (checkError) {
+            // Container isn't running, try to get logs to see what went wrong
+            console.error("Container failed to stay running!");
+            try {
+                const logs = await execPromise(`docker logs ${uniqueContainerName}`);
+                console.error(`Container logs: ${logs}`);
+                return res.status(500).send(`Error: Container failed to start. Logs: ${logs}`);
+            } catch (logError) {
+                return res.status(500).send('Error: Container failed to start and logs could not be retrieved');
+            }
+        }
+    } catch (error) {
+        console.error('Error processing document or starting container:', error);
+        return res.status(500).send(`Error: ${error.stderr || error.message || 'Unknown error'}`);
+    }
 });
 
 app.get('/container/:id', (req, res) => {
