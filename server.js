@@ -182,6 +182,7 @@ app.post('/upload', upload.single('docxFile'), async (req, res) => {
     console.log(`Executing command: ${pythonCmd}`);
     
     try {
+        // Run Python script to process DOCX
         const pythonOutput = await execPromise(pythonCmd);
         console.log(`Document processed: ${pythonOutput}`);
 
@@ -192,66 +193,64 @@ app.post('/upload', upload.single('docxFile'), async (req, res) => {
         const imageName = selectedTemplate === 'professional' ? 'resume-viewer-professional' : 'resume-viewer';
         const uniqueContainerName = `resume-${containerId}`;
             
-        // Changed workflow: First run the container, then wait to ensure it's stable before copying data
+        // Launch the Docker container
         console.log(`Starting Docker container with image ${imageName}...`);
-        const containerOutput = await execPromise(`docker run -d -p ${containerPort}:80 --name ${uniqueContainerName} ${imageName}`);
-        const containerId2 = containerOutput.trim();
         
-        // Wait to make sure container is stable (2 seconds)
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // First, run the container
+        const runCmd = `docker run -d -p ${containerPort}:80 --name ${uniqueContainerName} ${imageName}`;
+        const containerId2 = await execPromise(runCmd);
+        console.log(`Container started with ID: ${containerId2.trim()}`);
         
-        // Check if container is still running
-        console.log("Checking if container is running...");
-        try {
-            await execPromise(`docker inspect --format='{{.State.Running}}' ${uniqueContainerName}`);
-            console.log("Container is running, proceeding with data copy");
-            
-            const dataJsonPath = path.join(containerDir, 'data.json');
-            if (!fs.existsSync(dataJsonPath)) {
-                throw new Error(`data.json not found at ${dataJsonPath}`);
-            }
-
-            const fileSize = fs.statSync(dataJsonPath).size;
-            if (fileSize === 0) {
-                throw new Error(`data.json is empty (0 bytes)`);
-            }
-
-            console.log(`Verified data.json exists (${fileSize} bytes)`);
-            console.log(`Copying data.json to container...`);
-            
-            // Copy data.json to container
-            await execPromise(`docker cp ${dataJsonPath} ${uniqueContainerName}:/usr/share/nginx/html/data.json`);
-            
-            // Set correct permissions
-            await execPromise(`docker exec ${uniqueContainerName} chmod 644 /usr/share/nginx/html/data.json`);
-            
-            // Store container info for later use
-            activeContainers[containerId] = {
-                id: containerId2,
-                port: containerPort,
-                createdAt: new Date(),
-                template: selectedTemplate
-            };
-            
-            res.json({
-                success: true,
-                containerId: containerId,
-                url: `http://localhost:${containerPort}`,
-                template: selectedTemplate
-            });
-        } catch (checkError) {
-            // Container isn't running, try to get logs to see what went wrong
-            console.error("Container failed to stay running!");
-            try {
-                const logs = await execPromise(`docker logs ${uniqueContainerName}`);
-                console.error(`Container logs: ${logs}`);
-                return res.status(500).send(`Error: Container failed to start. Logs: ${logs}`);
-            } catch (logError) {
-                return res.status(500).send('Error: Container failed to start and logs could not be retrieved');
-            }
+        // Wait a moment to ensure the container is running
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        
+        // Verify the container is still running
+        const statusCmd = `docker ps -f "name=${uniqueContainerName}" --format "{{.Status}}"`;
+        const containerStatus = await execPromise(statusCmd);
+        console.log(`Container status: ${containerStatus.trim()}`);
+        
+        if (!containerStatus.includes('Up')) {
+            const logs = await execPromise(`docker logs ${uniqueContainerName}`);
+            console.error(`Container failed to start properly. Logs:\n${logs}`);
+            return res.status(500).send('Error: Container failed to start properly');
         }
+        
+        // Copy the data.json file to the container
+        const dataJsonPath = path.join(containerDir, 'data.json');
+        if (!fs.existsSync(dataJsonPath)) {
+            return res.status(500).send('Error: data.json not found');
+        }
+        
+        const fileSize = fs.statSync(dataJsonPath).size;
+        console.log(`Verified data.json exists (${fileSize} bytes)`);
+        
+        // Copy the file to the container
+        const cpCmd = `docker cp ${dataJsonPath} ${uniqueContainerName}:/usr/share/nginx/html/data.json`;
+        await execPromise(cpCmd);
+        console.log(`Copied data.json to container`);
+        
+        // Set permissions on the file
+        const chmodCmd = `docker exec ${uniqueContainerName} chmod 644 /usr/share/nginx/html/data.json`;
+        await execPromise(chmodCmd);
+        console.log(`Set permissions on data.json`);
+        
+        // Store container info for later use
+        activeContainers[containerId] = {
+            id: containerId2.trim(),
+            port: containerPort,
+            createdAt: new Date(),
+            template: selectedTemplate
+        };
+        
+        res.json({
+            success: true,
+            containerId: containerId,
+            url: `http://localhost:${containerPort}`,
+            template: selectedTemplate
+        });
+        
     } catch (error) {
-        console.error('Error processing document or starting container:', error);
+        console.error('Error:', error);
         return res.status(500).send(`Error: ${error.stderr || error.message || 'Unknown error'}`);
     }
 });
