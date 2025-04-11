@@ -4,9 +4,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultArea = document.getElementById('result-area');
     const templateSelector = document.getElementById('template-selector');
 
-    // Ensure template selector exists in the DOM
-    if (!templateSelector) {
-        console.error('Template selector not found. Adding it dynamically.');
+    // Only add template selector if it doesn't exist and the Upload section exists
+    // But first check if we already have template-options on the page to avoid duplication
+    const existingTemplateOptions = document.querySelector('.template-options');
+    if (!templateSelector && !existingTemplateOptions) {
+        console.log('Template selector not found and no existing template options. Adding it dynamically.');
         
         // Create template selector if it doesn't exist
         const uploadSection = document.getElementById('Upload');

@@ -1,7 +1,9 @@
 // resume-template/src/components/Education.js
-import React from 'react';
+import React, { useState } from 'react';
 
 const Education = ({ education }) => {
+  const [activeIndex, setActiveIndex] = useState(0);
+  
   // Handle case where no education data is provided
   if (!education || education.length === 0) {
     return (
@@ -19,6 +21,10 @@ const Education = ({ education }) => {
     );
   }
 
+  const handleEducationClick = (index) => {
+    setActiveIndex(index);
+  };
+
   return (
     <section id="education" className="education-section">
       <div className="container">
@@ -28,44 +34,61 @@ const Education = ({ education }) => {
         </div>
         
         <div className="education-container">
-          {education.map((edu, index) => (
-            <div className="education-item" key={index}>
-              <div className="education-icon">
-                <div className="icon-container">🎓</div>
+          <div className="education-tabs">
+            {education.map((edu, index) => (
+              <div 
+                key={index} 
+                className={`education-tab ${index === activeIndex ? 'active' : ''}`}
+                onClick={() => handleEducationClick(index)}
+              >
+                <div className="tab-content">
+                  <div className="institution-name">{edu.institution}</div>
+                  <div className="degree-title">{edu.degree.split(' ')[0]}</div>
+                </div>
+                <div className="education-indicator"></div>
               </div>
-              
-              <div className="education-content">
-                <h3 className="institution">{edu.institution}</h3>
-                <div className="degree">{edu.degree}</div>
-                <div className="education-meta">
-                  <div className="graduation-date">
-                    <i className="date-icon">📅</i>
-                    <span>{edu.graduation_date}</span>
+            ))}
+          </div>
+          
+          <div className="education-details">
+            {education[activeIndex] && (
+              <div className="education-card" key={activeIndex}>
+                <div className="education-header">
+                  <div className="education-title">
+                    <h3>{education[activeIndex].degree}</h3>
+                    <div className="institution">{education[activeIndex].institution}</div>
                   </div>
-                  {edu.gpa && (
-                    <div className="gpa">
-                      <i className="gpa-icon">📊</i>
-                      <span>GPA: {edu.gpa}</span>
+                  <div className="education-meta">
+                    <div className="graduation">
+                      <i className="graduation-icon">📅</i>
+                      <span>{education[activeIndex].graduation_date}</span>
                     </div>
-                  )}
+                    {education[activeIndex].gpa && (
+                      <div className="gpa">
+                        <i className="gpa-icon">📊</i>
+                        <span>GPA: {education[activeIndex].gpa}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 
-                {edu.relevant_coursework && edu.relevant_coursework.length > 0 && (
+                {education[activeIndex].relevant_coursework && 
+                 education[activeIndex].relevant_coursework.length > 0 && (
                   <div className="coursework">
                     <h4>Relevant Coursework</h4>
                     <ul>
-                      {edu.relevant_coursework.map((course, courseIndex) => (
+                      {education[activeIndex].relevant_coursework.map((course, courseIndex) => (
                         <li key={courseIndex}>
                           <div className="course-bullet"></div>
-                          <div className="course-name">{course}</div>
+                          <div className="course-text">{course}</div>
                         </li>
                       ))}
                     </ul>
                   </div>
                 )}
               </div>
-            </div>
-          ))}
+            )}
+          </div>
         </div>
       </div>
     </section>

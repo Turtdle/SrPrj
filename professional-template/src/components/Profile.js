@@ -56,41 +56,73 @@ const Profile = ({ name, contact, education }) => {
   const titles = generateTitles();
   
   useEffect(() => {
-    if (!typingTextRef.current) return;
-    
+    // Ensure ref is attached and titles exist and are not empty
+    if (!typingTextRef.current || !titles || titles.length === 0) {
+      console.warn("Typing effect: Ref not available or no titles provided.");
+      return; // Exit if no ref or no titles
+    }
+
     let currentTitleIndex = 0;
     let currentCharIndex = 0;
     let isDeleting = false;
     let typingSpeed = 150;
-    
+    let timeoutId = null; // Use a variable accessible within the effect's scope
+
     const type = () => {
+      // --- Safety Check ---
+      // Crucial: Check if the ref is still valid *inside* the timeout callback.
+      // The component could have unmounted between scheduling and execution.
+      if (!typingTextRef.current) {
+        return; // Stop if the element is gone
+      }
+
       const currentTitle = titles[currentTitleIndex];
-      
+
+      // Determine next text content and index
       if (isDeleting) {
+        // Deleting
         typingTextRef.current.textContent = currentTitle.substring(0, currentCharIndex - 1);
         currentCharIndex--;
-        typingSpeed = 50;
+        typingSpeed = 50; // Faster deleting speed
       } else {
+        // Typing
         typingTextRef.current.textContent = currentTitle.substring(0, currentCharIndex + 1);
         currentCharIndex++;
-        typingSpeed = 150;
+        typingSpeed = 150; // Normal typing speed
       }
-      
+
+      // --- State Transition Logic ---
+      // Check if current action (typing/deleting) is complete
       if (!isDeleting && currentCharIndex === currentTitle.length) {
+        // Finished typing the word
         isDeleting = true;
-        typingSpeed = 1500; // Wait before deleting
+        typingSpeed = 1500; // Pause after typing before deleting
       } else if (isDeleting && currentCharIndex === 0) {
+        // Finished deleting the word
         isDeleting = false;
-        currentTitleIndex = (currentTitleIndex + 1) % titles.length;
-        typingSpeed = 500; // Wait before typing next title
+        currentTitleIndex = (currentTitleIndex + 1) % titles.length; // Move to next title
+        typingSpeed = 500; // Pause after deleting before typing next word
       }
-      
-      setTimeout(type, typingSpeed);
+
+      // Schedule the next step *and store its ID*
+      timeoutId = setTimeout(type, typingSpeed);
     };
-    
-    const typingTimer = setTimeout(type, 1000);
-    
-    return () => clearTimeout(typingTimer);
+
+    // Start the effect after an initial delay (and store the ID)
+    timeoutId = setTimeout(type, 1000); // Initial delay before starting
+
+    // --- Cleanup Function ---
+    return () => {
+      // This function runs when the component unmounts or dependencies change.
+      // Clear the *last scheduled* timeout.
+      clearTimeout(timeoutId);
+
+      // Optional: You might want to clear the text content on cleanup too
+      // if (typingTextRef.current) {
+      //   typingTextRef.current.textContent = '';
+      // }
+    };
+
   }, [titles]);
   
   const handleContactClick = () => {
@@ -163,11 +195,7 @@ const Profile = ({ name, contact, education }) => {
             </div>
           </div>
           
-          <div className="wp-profile-image">
-            <div className="wp-profile-avatar">
-              <div className="wp-profile-initial">{name.charAt(0)}</div>
-            </div>
-          </div>
+
         </div>
       </div>
     </section>
