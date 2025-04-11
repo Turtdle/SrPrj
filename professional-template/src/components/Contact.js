@@ -1,3 +1,4 @@
+// professional-template/src/components/Contact.js
 import React, { useState } from 'react';
 
 const Contact = ({ contact }) => {
@@ -50,115 +51,110 @@ const Contact = ({ contact }) => {
   };
   
   return (
-    <section id="contact" className="contact-section section-alt">
+    <section id="contact" className="wp-skills-section">
       <div className="container">
-        <div className="section-title">
+        <div className="wp-section-header">
           <h2>Contact Me</h2>
           <p>Get in touch for inquiries and opportunities</p>
         </div>
         
-        <div className="contact-container">
-          <div className="contact-info">
-            <h3>Let's Connect</h3>
-            <p>
-              I'm interested in professional opportunities where I can contribute, learn, and grow.
-              Don't hesitate to reach out if you have any questions or would like to discuss potential collaboration.
-            </p>
-            
-            <div className="contact-details">
-              <div className="contact-item">
-                <div className="contact-icon">
-                  <i>📍</i>
-                </div>
-                <div className="contact-text">
+        <div className="wp-card" style={{marginBottom: '40px'}}>
+          <div className="wp-card-header">
+            <h3>Contact Information</h3>
+          </div>
+          <div className="wp-card-content">
+            <div className="wp-contact-info">
+              <div className="wp-contact-item">
+                <div className="wp-contact-icon">📍</div>
+                <div className="wp-contact-details">
                   <h4>Location</h4>
                   <p>{contact.location}</p>
                 </div>
               </div>
               
-              <div className="contact-item">
-                <div className="contact-icon">
-                  <i>✉️</i>
-                </div>
-                <div className="contact-text">
+              <div className="wp-contact-item">
+                <div className="wp-contact-icon">📧</div>
+                <div className="wp-contact-details">
                   <h4>Email</h4>
                   <p><a href={`mailto:${contact.email}`}>{contact.email}</a></p>
                 </div>
               </div>
               
-              <div className="contact-item">
-                <div className="contact-icon">
-                  <i>📱</i>
-                </div>
-                <div className="contact-text">
+              <div className="wp-contact-item">
+                <div className="wp-contact-icon">📱</div>
+                <div className="wp-contact-details">
                   <h4>Phone</h4>
                   <p><a href={`tel:${contact.phone}`}>{contact.phone}</a></p>
                 </div>
               </div>
-            </div>
-            
-            <div className="contact-social">
-              <h4>Social Profiles</h4>
-              <div className="social-links">
-                <a href="#" className="social-link" aria-label="LinkedIn">
-                  <i className="social-icon linkedin">in</i>
-                </a>
-                <a href="#" className="social-link" aria-label="GitHub">
-                  <i className="social-icon github">GH</i>
-                </a>
-                <a href="#" className="social-link" aria-label="Twitter">
-                  <i className="social-icon twitter">T</i>
-                </a>
+              
+              <div className="wp-contact-social">
+                <h4>Connect on Social</h4>
+                <div className="wp-profile-social">
+                  <a href="#" className="wp-social-link" aria-label="LinkedIn">
+                    in
+                  </a>
+                  <a href="#" className="wp-social-link" aria-label="GitHub">
+                    GH
+                  </a>
+                  <a href="#" className="wp-social-link" aria-label="Twitter">
+                    T
+                  </a>
+                </div>
               </div>
             </div>
           </div>
-          
-          <div className="contact-form-container">
-            <h3>Send a Message</h3>
-            
+        </div>
+        
+        <div className="wp-card">
+          <div className="wp-card-header">
+            <h3>Send Me a Message</h3>
+          </div>
+          <div className="wp-card-content">
             {formSubmitted ? (
-              <div className="form-success-message">
-                <div className="success-icon">✓</div>
+              <div className="wp-notice wp-notice-success">
                 <h4>Message Sent Successfully!</h4>
                 <p>
                   Thank you for reaching out. I'll respond to your inquiry as soon as possible.
                 </p>
               </div>
             ) : (
-              <form className="contact-form" onSubmit={handleSubmit}>
+              <form className="wp-form" onSubmit={handleSubmit}>
                 {formError && (
-                  <div className="form-error-message">
+                  <div className="wp-notice wp-notice-error">
                     <p>{formError}</p>
                   </div>
                 )}
                 
-                <div className="form-group">
-                  <label htmlFor="name">Your Name</label>
-                  <input 
-                    type="text" 
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder="John Doe"
-                    required
-                  />
+                <div className="wp-form-row">
+                  <div className="wp-form-group">
+                    <label htmlFor="name">Your Name</label>
+                    <input 
+                      type="text" 
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      placeholder="John Doe"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="wp-form-group">
+                    <label htmlFor="email">Your Email</label>
+                    <input 
+                      type="email" 
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="john@example.com"
+                      required
+                    />
+                  </div>
                 </div>
                 
-                <div className="form-group">
-                  <label htmlFor="email">Your Email</label>
-                  <input 
-                    type="email" 
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="john@example.com"
-                    required
-                  />
-                </div>
-                
-                <div className="form-group">
+                <div className="wp-form-group">
                   <label htmlFor="subject">Subject</label>
                   <input 
                     type="text" 
@@ -171,7 +167,7 @@ const Contact = ({ contact }) => {
                   />
                 </div>
                 
-                <div className="form-group">
+                <div className="wp-form-group">
                   <label htmlFor="message">Your Message</label>
                   <textarea 
                     id="message"
@@ -184,7 +180,7 @@ const Contact = ({ contact }) => {
                   ></textarea>
                 </div>
                 
-                <button type="submit" className="btn btn-primary">
+                <button type="submit" className="wp-button">
                   Send Message
                 </button>
               </form>

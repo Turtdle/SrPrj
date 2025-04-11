@@ -1,3 +1,4 @@
+// professional-template/src/components/Profile.js
 import React, { useEffect, useRef } from 'react';
 
 const Profile = ({ name, contact }) => {
@@ -64,57 +65,50 @@ const Profile = ({ name, contact }) => {
   };
   
   return (
-    <section id="profile" className="profile-section">
+    <section id="profile" className="wp-profile-section">
       <div className="container">
-        <div className="profile-content">
-          <div className="profile-text">
-            <div className="profile-intro">Welcome, I'm</div>
-            <h1 className="profile-name">{name}</h1>
-            <div className="profile-titles">
+        <div className="wp-profile-container">
+          <div className="wp-profile-content">
+            <div className="wp-profile-hello">Welcome, I'm</div>
+            <h1 className="wp-profile-name">{name}</h1>
+            <span className="wp-profile-title">
               <span ref={typingTextRef}></span><span className="cursor">|</span>
-            </div>
+            </span>
             
-            <p className="profile-description">
+            <p className="wp-profile-description">
               A passionate professional based in {contact.location}.
               I specialize in crafting exceptional digital experiences and
               innovative solutions.
             </p>
             
-            <div className="profile-actions">
-              <button className="btn btn-primary" onClick={handleContactClick}>
+            <div className="wp-profile-buttons">
+              <button className="wp-button wp-button-large" onClick={handleContactClick}>
                 Get In Touch
               </button>
-              <button className="btn btn-outline" onClick={handleResumeClick}>
+              <button className="wp-button wp-button-secondary wp-button-large" onClick={handleResumeClick}>
                 Download CV
               </button>
             </div>
             
-            <div className="profile-social">
-              <a href="#" className="social-link" aria-label="LinkedIn">
-                <i className="social-icon linkedin">in</i>
+            <div className="wp-profile-social">
+              <a href="#" className="wp-social-link" aria-label="LinkedIn">
+                in
               </a>
-              <a href="#" className="social-link" aria-label="GitHub">
-                <i className="social-icon github">GH</i>
+              <a href="#" className="wp-social-link" aria-label="GitHub">
+                GH
               </a>
-              <a href="#" className="social-link" aria-label="Twitter">
-                <i className="social-icon twitter">T</i>
+              <a href="#" className="wp-social-link" aria-label="Twitter">
+                T
               </a>
             </div>
           </div>
           
-          <div className="profile-image">
-            <div className="profile-image-frame">
-              <div className="profile-avatar">
-                <div className="initial">{name.charAt(0)}</div>
-              </div>
+          <div className="wp-profile-image">
+            <div className="wp-profile-avatar">
+              <div className="wp-profile-initial">{name.charAt(0)}</div>
             </div>
           </div>
         </div>
-      </div>
-      
-      <div className="scroll-indicator">
-        <div className="scroll-icon"></div>
-        <span>Scroll Down</span>
       </div>
     </section>
   );

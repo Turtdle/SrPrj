@@ -1,3 +1,4 @@
+// professional-template/src/App.js
 import React, { useState, useEffect } from 'react';
 import './App.css';
 
@@ -9,7 +10,6 @@ import Experience from './components/Experience';
 import Education from './components/Education';
 import Skills from './components/Skills';
 import Portfolio from './components/Portfolio';
-import Testimonials from './components/Testimonials';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 
@@ -63,30 +63,38 @@ function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Handle toggling mobile menu
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
   if (loading) {
     return (
-      <div className="loading-screen">
-        <div className="loader"></div>
-        <p>Loading profile data...</p>
+      <div className="wp-loading">
+        <div className="wp-loading-spinner"></div>
+        <p>Loading portfolio data...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="error-container">
+      <div className="wp-error">
+        <div className="wp-error-icon">!</div>
         <h2>Unable to load profile data</h2>
         <p>{error}</p>
-        <button onClick={() => window.location.reload()}>Retry</button>
+        <button className="wp-button" onClick={() => window.location.reload()}>Retry</button>
       </div>
     );
   }
 
   if (!resumeData) {
     return (
-      <div className="error-container">
+      <div className="wp-error">
+        <div className="wp-error-icon">!</div>
         <h2>No profile data available</h2>
         <p>Unable to load your professional profile information.</p>
+        <button className="wp-button" onClick={() => window.location.reload()}>Refresh Page</button>
       </div>
     );
   }
@@ -94,26 +102,26 @@ function App() {
   // Prepare normalized data structure with defaults
   const data = {
     ...resumeData,
-    name: resumeData.name || "Your Name",
+    name: resumeData.name || "Professional Name",
     contact: {
       ...resumeData.contact,
       email: (resumeData.contact && resumeData.contact.email) || "email@example.com",
       phone: (resumeData.contact && resumeData.contact.phone) || "123-456-7890",
-      location: (resumeData.contact && resumeData.contact.location) || "City, State"
+      location: (resumeData.contact && resumeData.contact.location) || "Location"
     },
     education: Array.isArray(resumeData.education) ? resumeData.education : [],
     experience: Array.isArray(resumeData.experience) ? resumeData.experience : [],
     projects: Array.isArray(resumeData.projects) ? resumeData.projects : [], 
-    skills: resumeData.skills || { languages: [], tools: [] }
-  };
-
-  // Handle toggling mobile menu
-  const toggleMenu = () => {
-    setMenuOpen(!menuOpen);
+    skills: {
+      languages: (resumeData.skills && Array.isArray(resumeData.skills.languages)) 
+        ? resumeData.skills.languages : [],
+      tools: (resumeData.skills && Array.isArray(resumeData.skills.tools)) 
+        ? resumeData.skills.tools : []
+    }
   };
 
   return (
-    <div className="professional-portfolio">
+    <div className="wp-site">
       <Header 
         name={data.name} 
         activeSection={activeSection} 
@@ -121,21 +129,13 @@ function App() {
         toggleMenu={toggleMenu}
       />
       
-      <main className="main-content">
+      <main className="wp-main">
         <Profile name={data.name} contact={data.contact} />
-        
         <About name={data.name} />
-        
         <Experience experiences={data.experience} />
-        
         <Education education={data.education} />
-        
         <Skills skills={data.skills} />
-        
         <Portfolio projects={data.projects} />
-        
-        <Testimonials />
-        
         <Contact contact={data.contact} />
       </main>
       

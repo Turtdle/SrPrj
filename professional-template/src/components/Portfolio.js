@@ -1,3 +1,4 @@
+// professional-template/src/components/Portfolio.js
 import React, { useState } from 'react';
 
 const Portfolio = ({ projects }) => {
@@ -8,15 +9,17 @@ const Portfolio = ({ projects }) => {
   // If there are no projects, return a placeholder
   if (!projects || !projects.length) {
     return (
-      <section id="portfolio" className="portfolio-section section-alt">
+      <section id="portfolio" className="wp-portfolio-section">
         <div className="container">
-          <div className="section-title">
+          <div className="wp-section-header">
             <h2>Project Portfolio</h2>
             <p>Showcasing selected professional work</p>
           </div>
           
-          <div className="no-content-message">
-            <p>No project information available.</p>
+          <div className="wp-card">
+            <div className="wp-card-content">
+              <p>No project information available.</p>
+            </div>
           </div>
         </div>
       </section>
@@ -54,20 +57,20 @@ const Portfolio = ({ projects }) => {
   };
   
   return (
-    <section id="portfolio" className="portfolio-section section-alt">
+    <section id="portfolio" className="wp-portfolio-section">
       <div className="container">
-        <div className="section-title">
+        <div className="wp-section-header">
           <h2>Project Portfolio</h2>
           <p>Showcasing selected professional work</p>
         </div>
         
         {/* Filter buttons - only show if we have technologies */}
         {allTechnologies.length > 0 && (
-          <div className="portfolio-filters">
+          <div className="wp-portfolio-filters">
             {filterCategories.map((filter, index) => (
               <button 
                 key={index} 
-                className={`filter-btn ${activeFilter === filter ? 'active' : ''}`}
+                className={`wp-filter-button ${activeFilter === filter ? 'active' : ''}`}
                 onClick={() => setActiveFilter(filter)}
               >
                 {filter === 'all' ? 'All Projects' : filter}
@@ -77,35 +80,35 @@ const Portfolio = ({ projects }) => {
         )}
         
         {/* Projects grid */}
-        <div className="portfolio-grid">
+        <div className="wp-portfolio-grid">
           {filteredProjects.map((project, index) => (
-            <div className="portfolio-item" key={index}>
-              <div className="portfolio-card">
-                <div className="portfolio-img">
-                  <div className="project-placeholder">
-                    <span>{project.name.charAt(0)}</span>
+            <div className="wp-portfolio-item" key={index}>
+              <div className="wp-portfolio-image">
+                <div className="wp-portfolio-placeholder">
+                  {project.name.charAt(0)}
+                </div>
+              </div>
+              <div className="wp-portfolio-content">
+                <h3 className="wp-portfolio-title">{project.name}</h3>
+                <p className="wp-portfolio-description">
+                  {project.description}
+                </p>
+                {project.technologies && project.technologies.length > 0 && (
+                  <div className="wp-portfolio-tags">
+                    {project.technologies.slice(0, 3).map((tech, techIndex) => (
+                      <span className="wp-portfolio-tag" key={techIndex}>{tech}</span>
+                    ))}
+                    {project.technologies.length > 3 && (
+                      <span className="wp-portfolio-tag">+{project.technologies.length - 3} more</span>
+                    )}
                   </div>
-                </div>
-                <div className="portfolio-content">
-                  <h3 className="portfolio-title">{project.name}</h3>
-                  <p className="portfolio-excerpt">
-                    {project.description?.substring(0, 100)}
-                    {project.description?.length > 100 ? '...' : ''}
-                  </p>
-                  {project.technologies && project.technologies.length > 0 && (
-                    <div className="portfolio-tags">
-                      {project.technologies.map((tech, techIndex) => (
-                        <span className="tag" key={techIndex}>{tech}</span>
-                      ))}
-                    </div>
-                  )}
-                  <button 
-                    className="btn-view-project"
-                    onClick={() => openProjectModal(project)}
-                  >
-                    View Details
-                  </button>
-                </div>
+                )}
+                <button 
+                  className="wp-portfolio-button"
+                  onClick={() => openProjectModal(project)}
+                >
+                  View Details
+                </button>
               </div>
             </div>
           ))}
@@ -113,32 +116,30 @@ const Portfolio = ({ projects }) => {
         
         {/* Project modal */}
         {modalOpen && selectedProject && (
-          <div className="project-modal">
-            <div className="modal-overlay" onClick={closeProjectModal}></div>
-            <div className="modal-content">
-              <button className="modal-close" onClick={closeProjectModal}>×</button>
-              
-              <div className="modal-header">
-                <h2 className="modal-title">{selectedProject.name}</h2>
+          <div className="wp-portfolio-modal">
+            <div className="wp-modal-content">
+              <div className="wp-modal-header">
+                <h2 className="wp-modal-title">{selectedProject.name}</h2>
+                <button className="wp-modal-close" onClick={closeProjectModal}>×</button>
               </div>
               
-              <div className="modal-body">
-                <div className="project-image">
-                  <div className="project-placeholder large">
-                    <span>{selectedProject.name.charAt(0)}</span>
+              <div className="wp-modal-body">
+                <div className="wp-modal-image">
+                  <div className="wp-modal-placeholder">
+                    {selectedProject.name.charAt(0)}
                   </div>
                 </div>
                 
-                <div className="project-description">
+                <div className="wp-modal-description">
                   <h3>Project Overview</h3>
                   <p>{selectedProject.description}</p>
                   
                   {selectedProject.technologies && selectedProject.technologies.length > 0 && (
-                    <div className="project-technologies">
+                    <div className="wp-modal-technologies">
                       <h3>Technologies Used</h3>
-                      <div className="technologies-list">
+                      <div className="wp-tech-list">
                         {selectedProject.technologies.map((tech, index) => (
-                          <span className="technology-badge" key={index}>{tech}</span>
+                          <span className="wp-tech-badge" key={index}>{tech}</span>
                         ))}
                       </div>
                     </div>
@@ -146,8 +147,8 @@ const Portfolio = ({ projects }) => {
                 </div>
               </div>
               
-              <div className="modal-footer">
-                <button className="btn btn-primary" onClick={closeProjectModal}>
+              <div className="wp-card-footer">
+                <button className="wp-button" onClick={closeProjectModal}>
                   Close
                 </button>
               </div>

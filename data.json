@@ -1,109 +1,126 @@
 {
-  "name": "Samuel Wan",
+  "name": "EMILY RODRIGUEZ",
   "contact": {
-    "location": "Pacific Palisades, CA 90",
-    "phone": "(310) 658-1228",
-    "email": "sam@wanfamily.org"
+    "location": "Mountain View, CA 94043",
+    "phone": "(650) 123-4567",
+    "email": "emily.rodriguez@example.com"
   },
   "education": [
     {
-      "institution": "University of the Pacific, Stockton",
-      "degree": "Bachelor of Science (B.S.) \u2013 Computer Science",
-      "graduation_date": "May 2025",
-      "gpa": "3.81",
+      "institution": "MASSACHUSETTS INSTITUTE OF TECHNOLOGY (MIT)",
+      "degree": "Master of Science in Computer Science - Artificial Intelligence",
+      "graduation_date": "December 2023",
+      "gpa": "3.94/4.0",
+      "relevant_coursework": []
+    },
+    {
+      "institution": "UNIVERSITY OF ILLINOIS URBANA-CHAMPAIGN",
+      "degree": "Bachelor of Science in Statistics with Computer Science minor",
+      "graduation_date": "May 2021",
+      "gpa": "3.88/4.0",
       "relevant_coursework": []
     }
   ],
   "experience": [
     {
-      "position": "Software Engineer Intern",
-      "company": "Britive, Inc.",
-      "location": "Glendale, CA",
-      "duration": "Aug 2024 - Present",
+      "position": "Machine Learning Engineer",
+      "company": "NVIDIA",
+      "location": "Santa Clara, CA",
+      "duration": "January 2024 - Present",
       "responsibilities": [
-        "Automate reports from over 50 databases of varying types, including SQL, DynamoDB and Elasticsearch, including writing scripts in Bash and Python to aggregate data, write complex SQL queries, and Docker set up for daily processing",
-        "Maintain Python SDK in Agile environment as dictated by the updates to the REST Ful API, thus implementing four features for the release of versions 2.11, 3.0, and 3.1",
-        "Experience with writing 80+ unit tests in Python SDK"
+        "Develop and optimize deep learning models for computer vision applications",
+        "Implement CUDA optimizations that improved training speed by 35%",
+        "Collaborate with research team on next-generation AI architectures",
+        "Created automated CI/CD pipeline for model deployment using Kubernetes"
       ]
     },
     {
-      "position": "Software Engineer Intern",
-      "company": "Landing International",
-      "location": "Los Angeles, CA",
-      "duration": "Feb 2024 \u2013 Present",
+      "position": "Data Science Intern",
+      "company": "APPLE",
+      "location": "Cupertino, CA",
+      "duration": "June 2022 - December 2023",
       "responsibilities": [
-        "Fullstack development of application organizing company video data and AI processing of thousands of videos, using React JS, Tailwind CSS, Reflex, MongoDB, AWS EC2/ECR and varying LLMs",
-        "Used Python Requests and Python Selenium to scrape websites for product brands, price and rankings"
+        "Designed recommendation algorithms for Apple Music that increased user engagement by 12%",
+        "Built data pipelines processing over 15TB of daily user interaction data",
+        "Created visualization dashboards for executive reporting using Tableau",
+        "Implemented A/B testing framework for feature evaluation"
       ]
     },
     {
-      "position": "Teaching Assistant",
-      "company": "University of the Pacific",
-      "location": "Stockton, CA",
-      "duration": "Feb 2024 \u2013 Present",
+      "position": "Software Engineering Intern",
+      "company": "AMAZON",
+      "location": "Seattle, WA",
+      "duration": "May 2021 - August 2021",
       "responsibilities": [
-        "Support instruction of Intro to Programming in C++ course of 20 students; host 3-hr office hours weekly",
-        "Support instruction of Engineering and Computing Ethics course, two sections of 20-25 students; grade papers and quizzes"
-      ]
-    },
-    {
-      "position": "Research Fellow",
-      "company": "University of the Pacific Summer Undergraduate Research Fellowship",
-      "location": "",
-      "duration": "Aug 2024",
-      "responsibilities": [
-        "Worked on Powell Scholars Lead Student research project under Dr. Carla Strickland-Hughes focusing on words recalled on a memory test in order to discover more efficient memorization methods",
-        "Wrote program in Python to compare over 100 word lists from participants' memory tests"
+        "Built microservices for inventory management system using Java and AWS",
+        "Developed REST APIs handling over 5,000 requests per minute",
+        "Optimized database queries reducing latency by 27%",
+        "Participated in agile development process and code reviews"
       ]
     }
   ],
   "projects": [
     {
-      "name": "CalHacks 11.0",
-      "description": "Developed an application winning Best Reflex Web App using Reflex's pure Python framework that allows users to shop at any Target location with a personalized route optimized for maximum efficiency based on user's shopping list",
+      "name": "MULTIMODAL HEALTHCARE DIAGNOSTICS SYSTEM",
+      "description": "Developed an AI system that analyzes medical images, patient history, and lab results",
       "technologies": [
-        "Selenium",
-        "Amazon S3",
-        "Google Firebase",
-        "Google Gemini",
-        "AWS Lambda",
-        "AWS API Endpoint"
+        "PyTorch",
+        "Federated Learning"
       ]
     },
     {
-      "name": "Neuroevolution Starcraft Bot",
-      "description": "Created custom training environment configured for Starcraft II with Python and Starcraft API client",
+      "name": "EXPLAINABLE AI FRAMEWORK",
+      "description": "Created a framework for generating human-understandable explanations for complex ML models",
       "technologies": [
-        "Python",
-        "Starcraft API",
+        "LIME",
+        "SHAP",
+        "GitHub"
+      ]
+    },
+    {
+      "name": "SMART CITY TRAFFIC OPTIMIZATION",
+      "description": "Built traffic flow prediction system using spatio-temporal graph neural networks",
+      "technologies": [
         "TensorFlow",
-        "Evolutionary algorithms"
+        "Graph Neural Networks",
+        "Edge Devices"
       ]
     }
   ],
   "skills": {
     "languages": [
       "Python",
-      "Java",
-      "JavaScript",
+      "R",
       "SQL",
+      "Julia",
+      "Java",
       "C++",
-      "C",
-      "Bash Script",
-      "Unit Testing",
-      "Git",
-      "Unreal Engine 4"
+      "JavaScript"
     ],
     "tools": [
+      "PyTorch",
+      "TensorFlow",
+      "scikit-learn",
+      "Pandas",
+      "NumPy",
+      "Hugging Face",
       "AWS",
-      "Linux",
-      "React JS",
-      "Tailwind CSS",
-      "MongoDB",
-      "DynamoDB",
-      "JIRA",
+      "Google Cloud",
+      "Hadoop",
+      "Spark",
+      "Kafka",
+      "Airflow",
+      "Tableau",
+      "PowerBI",
+      "Matplotlib",
+      "D3.js",
+      "Plotly",
+      "Git",
       "Docker",
-      "Typescript"
+      "Kubernetes",
+      "Linux",
+      "Jupyter",
+      "VS Code"
     ]
   }
 }

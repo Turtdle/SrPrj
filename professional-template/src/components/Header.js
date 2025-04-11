@@ -1,3 +1,4 @@
+// professional-template/src/components/Header.js
 import React, { useState, useEffect } from 'react';
 
 const Header = ({ name, activeSection, menuOpen, toggleMenu }) => {
@@ -33,17 +34,17 @@ const Header = ({ name, activeSection, menuOpen, toggleMenu }) => {
   };
   
   return (
-    <header className={`site-header ${scrolled ? 'scrolled' : ''}`}>
+    <header className={`wp-admin-header ${scrolled ? 'scrolled' : ''}`}>
       <div className="container">
-        <div className="header-content">
-          <div className="brand">
+        <div className="wp-admin-header-content">
+          <div className="wp-brand">
             <a href="#profile" onClick={() => scrollToSection('profile')}>
-              <span className="logo-initial">{name.charAt(0)}</span>
-              <span className="brand-name">{firstName}<span className="brand-last">Portfolio</span></span>
+              <div className="wp-logo">{name.charAt(0)}</div>
+              <div className="wp-site-title">{firstName}'s Portfolio</div>
             </a>
           </div>
           
-          <nav className="desktop-nav">
+          <nav className="wp-admin-nav">
             <ul>
               <li>
                 <a 
@@ -132,18 +133,18 @@ const Header = ({ name, activeSection, menuOpen, toggleMenu }) => {
             </ul>
           </nav>
           
-          <div 
-            className={`mobile-menu-toggle ${menuOpen ? 'active' : ''}`}
+          <button 
+            className={`wp-menu-toggle ${menuOpen ? 'active' : ''}`}
             onClick={toggleMenu}
             aria-label="Toggle menu"
           >
             <span></span>
             <span></span>
             <span></span>
-          </div>
+          </button>
         </div>
         
-        <nav className={`mobile-nav ${menuOpen ? 'open' : ''}`}>
+        <nav className={`wp-mobile-nav ${menuOpen ? 'open' : ''}`}>
           <ul>
             <li>
               <a 
