@@ -45,6 +45,16 @@
         "Support instruction of Intro to Programming in C++ course of 20 students; host 3-hr office hours weekly",
         "Support instruction of Engineering and Computing Ethics course, two sections of 20-25 students; grade papers and quizzes"
       ]
+    },
+    {
+      "position": "Research Fellow",
+      "company": "University of the Pacific Summer Undergraduate Research Fellowship",
+      "location": "",
+      "duration": "Aug 2024",
+      "responsibilities": [
+        "Worked on Powell Scholars Lead Student research project under Dr. Carla Strickland-Hughes focusing on words recalled on a memory test in order to discover more efficient memorization methods",
+        "Wrote program in Python to compare over 100 word lists from participants' memory tests"
+      ]
     }
   ],
   "projects": [
@@ -62,12 +72,12 @@
     },
     {
       "name": "Neuroevolution Starcraft Bot",
-      "description": "Created custom training environment configured for Starcraft II with Python and Starcraft API client. Using evolutionary algorithms and TensorFlow, trained bot in over 400 games to interact with training environment",
+      "description": "Created custom training environment configured for Starcraft II with Python and Starcraft API client",
       "technologies": [
         "Python",
         "Starcraft API",
         "TensorFlow",
-        "Evolutionary Algorithms"
+        "Evolutionary algorithms"
       ]
     }
   ],
