@@ -4,24 +4,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Professional Website Generator</title>
+    <title>Resume Website Generator</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header>
         <h1>Resume Website Generator</h1>
-
     </header>
     <main>
         <section id="Upload">
-            <h2>Upload</h2>
+            <h2>Generate Your Resume Website</h2>
+            
+            <div class="template-selector-container">
+                <h3>Choose a template style:</h3>
+                <div class="template-options">
+                    <div class="template-option">
+                        <input type="radio" id="modern-template" name="template" value="modern" checked>
+                        <label for="modern-template">
+                            <div class="template-preview modern">
+                                <div class="preview-content">
+                                    <div class="preview-header"></div>
+                                    <div class="preview-body">
+                                        <div class="preview-column left"></div>
+                                        <div class="preview-column right"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <span>Modern Design</span>
+                        </label>
+                    </div>
+                    <div class="template-option">
+                        <input type="radio" id="professional-template" name="template" value="professional">
+                        <label for="professional-template">
+                            <div class="template-preview professional">
+                                <div class="preview-content">
+                                    <div class="preview-header pro"></div>
+                                    <div class="preview-section"></div>
+                                    <div class="preview-section"></div>
+                                    <div class="preview-section"></div>
+                                </div>
+                            </div>
+                            <span>Professional Design</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
             <div id="drop-zone" class="drop-zone">
-                <p>Drag & Drop files here or click to upload</p>
-                <input type="file" id="file-input" hidden>
+                <p>Drag & Drop your resume (.docx) here or click to upload</p>
+                <input type="file" id="file-input" accept=".docx" hidden>
             </div>
             <div id="result-area" class="result-area"></div>
         </section>
+        
+        <section id="Instructions">
+            <h2>How It Works</h2>
+            <div class="instructions-container">
+                <div class="instruction-step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Choose a Template Style</h3>
+                        <p>Select either the modern or professional design template for your resume website.</p>
+                    </div>
+                </div>
+                <div class="instruction-step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Upload Your Resume</h3>
+                        <p>Upload your resume in Microsoft Word (.docx) format. The system will extract all the important information.</p>
+                    </div>
+                </div>
+                <div class="instruction-step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>View Your Website</h3>
+                        <p>Your professional resume website will be generated instantly. View it, share it, or save it for later.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
+    <footer>
+        <p>Resume Website Generator &copy; 2025</p>
+    </footer>
     <script src="script.js"></script>
 </body>
 </html>

@@ -8,38 +8,54 @@ const { v4: uuidv4 } = require('uuid');
 const app = express();
 const port = 3000;
 
-// a
-let imageChecked = false;
+// Track which images have been checked
+let modernTemplateChecked = false;
+let professionalTemplateChecked = false;
 
-function ensureResumeViewerImageExists() {
+// Ensure template images exist
+function ensureTemplateImageExists(templateName) {
     return new Promise((resolve, reject) => {
-      if (imageChecked) {
-        console.log('Resume viewer image already verified');
-        resolve();
-        return;
-      }
-      
-      exec('docker image inspect resume-viewer', (error) => {
-        if (error) {
-          console.log('Resume viewer image not found, building it now...');
-          exec('docker build -t resume-viewer -f resume-template/Dockerfile.build .', (buildError, stdout, stderr) => {
-            if (buildError) {
-              console.error('Error building resume-viewer image:', stderr);
-              reject(buildError);
-            } else {
-              console.log('Successfully built resume-viewer image');
-              imageChecked = true;
-              resolve();
-            }
-          });
-        } else {
-          console.log('Resume viewer image already exists');
-          imageChecked = true;
-          resolve();
+        const imageTag = templateName === 'professional' ? 'professional-resume-viewer' : 'resume-viewer';
+        const isChecked = templateName === 'professional' ? professionalTemplateChecked : modernTemplateChecked;
+        const dockerfile = templateName === 'professional' 
+            ? 'professional-template/Dockerfile.build' 
+            : 'resume-template/Dockerfile.build';
+        
+        if (isChecked) {
+            console.log(`${imageTag} image already verified`);
+            resolve();
+            return;
         }
-      });
+        
+        exec(`docker image inspect ${imageTag}`, (error) => {
+            if (error) {
+                console.log(`${imageTag} image not found, building it now...`);
+                exec(`docker build -t ${imageTag} -f ${dockerfile} .`, (buildError, stdout, stderr) => {
+                    if (buildError) {
+                        console.error(`Error building ${imageTag} image:`, stderr);
+                        reject(buildError);
+                    } else {
+                        console.log(`Successfully built ${imageTag} image`);
+                        if (templateName === 'professional') {
+                            professionalTemplateChecked = true;
+                        } else {
+                            modernTemplateChecked = true;
+                        }
+                        resolve();
+                    }
+                });
+            } else {
+                console.log(`${imageTag} image already exists`);
+                if (templateName === 'professional') {
+                    professionalTemplateChecked = true;
+                } else {
+                    modernTemplateChecked = true;
+                }
+                resolve();
+            }
+        });
     });
-  }
+}
   
 function findPythonInterpreter() {
     const inDocker = fs.existsSync('/.dockerenv');
@@ -78,6 +94,7 @@ function findPythonInterpreter() {
 const PYTHON_PATH = findPythonInterpreter();
 
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json());
 
 const upload = multer({ dest: 'uploads/' });
 
@@ -92,11 +109,14 @@ app.post('/upload', upload.single('docxFile'), async (req, res) => {
         return res.status(400).send('Please upload a .docx file');
     }
 
+    // Get template choice - default to 'modern' if not specified
+    const templateChoice = req.body.template || 'modern';
+    const imageTag = templateChoice === 'professional' ? 'professional-resume-viewer' : 'resume-viewer';
 
     try {
-        await ensureResumeViewerImageExists();
+        await ensureTemplateImageExists(templateChoice);
     } catch (error) {
-        console.error('Failed to ensure resume-viewer image exists:', error);
+        console.error(`Failed to ensure ${imageTag} image exists:`, error);
         return res.status(500).send('Error preparing container image');
     }
 
@@ -151,11 +171,9 @@ app.post('/upload', upload.single('docxFile'), async (req, res) => {
                 console.error(`Warning: chmod failed: ${chmodError.message}`);
             }
             
-
             const uniqueContainerName = `resume-${containerId}`;
-            //d
             const dockerRunCmd = `
-            docker run -d -p ${containerPort}:80 --name ${uniqueContainerName} resume-viewer && 
+            docker run -d -p ${containerPort}:80 --name ${uniqueContainerName} ${imageTag} && 
             docker cp ${path.join(containerDir, 'data.json')} ${uniqueContainerName}:/usr/share/nginx/html/data.json && 
             docker exec ${uniqueContainerName} chmod 644 /usr/share/nginx/html/data.json
             `;
@@ -187,13 +205,15 @@ app.post('/upload', upload.single('docxFile'), async (req, res) => {
                 activeContainers[containerId] = {
                     id: stdout.trim(),
                     port: containerPort,
-                    createdAt: new Date()
+                    createdAt: new Date(),
+                    template: templateChoice
                 };
                 
                 res.json({
                     success: true,
                     containerId: containerId,
-                    url: `http://localhost:${containerPort}`
+                    url: `http://localhost:${containerPort}`,
+                    template: templateChoice
                 });
             });
         });
@@ -205,7 +225,8 @@ app.get('/container/:id', (req, res) => {
     if (activeContainers[containerId]) {
         res.json({
             active: true,
-            url: `http://localhost:${activeContainers[containerId].port}`
+            url: `http://localhost:${activeContainers[containerId].port}`,
+            template: activeContainers[containerId].template || 'modern'
         });
     } else {
         res.json({ active: false });

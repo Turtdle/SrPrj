@@ -1,0 +1,29 @@
+FROM nginx:alpine
+
+RUN apk add --update nodejs npm
+
+WORKDIR /app
+
+COPY professional-template/package*.json ./
+
+RUN npm install
+
+COPY professional-template/public ./public
+COPY professional-template/src ./src
+
+ENV BROWSER=none
+
+RUN npm run build
+
+RUN cp -r build/* /usr/share/nginx/html/
+
+RUN mkdir -p /var/log && \
+    touch /var/log/container-startup.log /var/log/container-debug.log && \
+    chmod 666 /var/log/container-startup.log /var/log/container-debug.log
+
+COPY start-container.sh /start-container.sh
+RUN chmod +x /start-container.sh
+
+ENTRYPOINT ["/start-container.sh"]
+
+EXPOSE 80
