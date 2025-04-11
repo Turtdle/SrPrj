@@ -16,10 +16,10 @@ services:
     restart: unless-stopped
     container_name: resume-generator-main
 
-  #DASJOVWEJVAEIJPEWNHRIAERNEREP
-  #resume-viewer-builder:
-  #  build:
-  #    context: .
-  #    dockerfile: resume-template/Dockerfile.build
-  #  image: resume-viewer
-  #  container_name: resume-viewer-builder
+  # Uncomment to build the fixed professional template image
+  professional-resume-builder:
+    build:
+      context: .
+      dockerfile: professional-template/Dockerfile.build
+    image: professional-resume-viewer
+    container_name: professional-resume-builder

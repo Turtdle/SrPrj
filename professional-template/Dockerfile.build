@@ -21,8 +21,11 @@ RUN mkdir -p /var/log && \
     touch /var/log/container-startup.log /var/log/container-debug.log && \
     chmod 666 /var/log/container-startup.log /var/log/container-debug.log
 
-COPY start-container.sh /start-container.sh
-RUN chmod +x /start-container.sh
+# Create the script directly in the container to avoid any copy issues
+RUN echo '#!/bin/sh' > /start-container.sh && \
+    echo 'echo "Container starting..."' >> /start-container.sh && \
+    echo 'nginx -g "daemon off;"' >> /start-container.sh && \
+    chmod +x /start-container.sh
 
 ENTRYPOINT ["/start-container.sh"]
 
