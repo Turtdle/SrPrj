@@ -21,9 +21,15 @@ RUN mkdir -p /var/log && \
     touch /var/log/container-startup.log /var/log/container-debug.log && \
     chmod 666 /var/log/container-startup.log /var/log/container-debug.log
 
+# Copy the start-container.sh script with LF line endings
 COPY start-container.sh /start-container.sh
-RUN chmod +x /start-container.sh
 
+# Make sure the script has proper permissions and line endings
+RUN chmod +x /start-container.sh && \
+    # Convert CRLF to LF (in case it was created on Windows)
+    sed -i 's/\r$//' /start-container.sh
+
+# Set the entrypoint to the script
 ENTRYPOINT ["/start-container.sh"]
 
 EXPOSE 80
