@@ -5,8 +5,8 @@ const About = ({ name, education, contact }) => {
   // Extract first name
   const firstName = name.split(' ')[0];
   
-  // Get education details
-  const universityEducation = education && education.length > 0 ? education[0] : null;
+  // Get education details - now handles multiple education items
+  const hasEducation = education && education.length > 0;
   
   return (
     <section id="about" className="about-section">
@@ -24,7 +24,9 @@ const About = ({ name, education, contact }) => {
               </div>
             </div>
             <div className="experience-badge">
-              <span className="experience-number">{education && education.length > 0 ? education[0].graduation_date.slice(-4) : ""}</span>
+              <span className="experience-number">
+                {hasEducation ? education[0].graduation_date.slice(-4) : ""}
+              </span>
               <span className="experience-text">GRAD</span>
             </div>
           </div>
@@ -32,7 +34,8 @@ const About = ({ name, education, contact }) => {
           <div className="about-text">
             <h3>Who am I?</h3>
             <p className="intro-paragraph">
-              I'm <strong>{name}</strong>, a passionate {universityEducation ? universityEducation.degree : 'Computer Science'} graduate{universityEducation ? ` from ${universityEducation.institution}` : ''}. 
+              I'm <strong>{name}</strong>, a passionate {hasEducation ? education[0].degree : 'Computer Science'} graduate
+              {hasEducation ? ` from ${education[0].institution}` : ''}. 
               I specialize in building robust applications and solving complex problems through innovative technology solutions.
             </p>
             
@@ -41,20 +44,22 @@ const About = ({ name, education, contact }) => {
               My passion for technology drives me to continuously expand my knowledge and skills in the ever-evolving tech landscape.
             </p>
             
-            {universityEducation && (
+            {hasEducation && (
               <div className="education-highlight">
                 <h4>Education</h4>
-                <div className="education-card">
-                  <div className="education-icon">
-                    <i className="edu-icon">🎓</i>
+                {education.map((edu, index) => (
+                  <div className="education-card" key={index} style={index > 0 ? {marginTop: '15px'} : {}}>
+                    <div className="education-icon">
+                      <i className="edu-icon">🎓</i>
+                    </div>
+                    <div className="education-details">
+                      <h5>{edu.institution}</h5>
+                      <p className="degree">{edu.degree}</p>
+                      <p className="graduation">Graduation: {edu.graduation_date}</p>
+                      {edu.gpa && <p className="gpa">GPA: {edu.gpa}</p>}
+                    </div>
                   </div>
-                  <div className="education-details">
-                    <h5>{universityEducation.institution}</h5>
-                    <p className="degree">{universityEducation.degree}</p>
-                    <p className="graduation">Graduation: {universityEducation.graduation_date}</p>
-                    {universityEducation.gpa && <p className="gpa">GPA: {universityEducation.gpa}</p>}
-                  </div>
-                </div>
+                ))}
               </div>
             )}
             

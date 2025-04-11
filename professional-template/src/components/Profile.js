@@ -1,15 +1,59 @@
 // professional-template/src/components/Profile.js
 import React, { useEffect, useRef } from 'react';
 
-const Profile = ({ name, contact }) => {
+const Profile = ({ name, contact, education }) => {
   const typingTextRef = useRef(null);
   
-  // Professional titles based on experience data or default to generic professional titles
-  const titles = [
-    "Professional Portfolio",
-    "Digital Curriculum Vitae", 
-    "Career Showcase"
-  ];
+  // Generate professional titles based on education if available
+  const generateTitles = () => {
+    const defaultTitles = [
+      "Professional Portfolio",
+      "Digital Curriculum Vitae", 
+      "Career Showcase"
+    ];
+    
+    if (!education || education.length === 0) {
+      return defaultTitles;
+    }
+    
+    const educationTitles = [];
+    
+    // Generate titles based on highest education (assuming first is most recent)
+    education.forEach(edu => {
+      const degreeLower = edu.degree.toLowerCase();
+      
+      if (degreeLower.includes('computer science') || degreeLower.includes('software')) {
+        educationTitles.push("Software Professional");
+      }
+      
+      if (degreeLower.includes('master')) {
+        educationTitles.push(`M${degreeLower.includes('science') ? 'S' : 'A'} Graduate`);
+      } else if (degreeLower.includes('phd') || degreeLower.includes('doctor')) {
+        educationTitles.push("PhD Professional");
+      } else if (degreeLower.includes('bachelor')) {
+        educationTitles.push(`B${degreeLower.includes('science') ? 'S' : 'A'} Graduate`);
+      }
+      
+      // Add field-specific titles
+      if (degreeLower.includes('artificial intelligence') || degreeLower.includes('ai')) {
+        educationTitles.push("AI Specialist");
+      } else if (degreeLower.includes('data')) {
+        educationTitles.push("Data Professional");
+      } else if (degreeLower.includes('engineering')) {
+        educationTitles.push("Engineering Professional");
+      } else if (degreeLower.includes('business')) {
+        educationTitles.push("Business Professional");
+      } else if (degreeLower.includes('marketing')) {
+        educationTitles.push("Marketing Professional");
+      }
+    });
+    
+    // Return unique titles, with fallback to default titles if none generated
+    const uniqueTitles = [...new Set(educationTitles)];
+    return uniqueTitles.length > 0 ? uniqueTitles : defaultTitles;
+  };
+  
+  const titles = generateTitles();
   
   useEffect(() => {
     if (!typingTextRef.current) return;
@@ -47,7 +91,7 @@ const Profile = ({ name, contact }) => {
     const typingTimer = setTimeout(type, 1000);
     
     return () => clearTimeout(typingTimer);
-  }, []);
+  }, [titles]);
   
   const handleContactClick = () => {
     const contactSection = document.getElementById('contact');
@@ -64,6 +108,24 @@ const Profile = ({ name, contact }) => {
     alert('In a real implementation, this would download your resume or CV.');
   };
   
+  // Generate a professional description based on education
+  const getDescription = () => {
+    if (!education || education.length === 0) {
+      return `A passionate professional based in ${contact.location}. I specialize in crafting exceptional digital experiences and innovative solutions.`;
+    }
+    
+    // Get highest degree (assuming first in array is most recent/highest)
+    const highestDegree = education[0].degree;
+    const highestSchool = education[0].institution;
+    
+    // If they have multiple degrees, mention that
+    const multipleDegreesText = education.length > 1 
+      ? ` with multiple degrees including a ${education.map(e => e.degree.split(' ')[0]).join(' and a ')}`
+      : '';
+    
+    return `A passionate professional based in ${contact.location}${multipleDegreesText}. I bring a strong educational background from ${highestSchool} to delivering exceptional solutions in my field.`;
+  };
+  
   return (
     <section id="profile" className="wp-profile-section">
       <div className="container">
@@ -76,9 +138,7 @@ const Profile = ({ name, contact }) => {
             </span>
             
             <p className="wp-profile-description">
-              A passionate professional based in {contact.location}.
-              I specialize in crafting exceptional digital experiences and
-              innovative solutions.
+              {getDescription()}
             </p>
             
             <div className="wp-profile-buttons">

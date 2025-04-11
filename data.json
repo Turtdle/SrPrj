@@ -65,7 +65,7 @@
       "description": "Developed an AI system that analyzes medical images, patient history, and lab results",
       "technologies": [
         "PyTorch",
-        "Federated Learning"
+        "Federated learning"
       ]
     },
     {
@@ -82,8 +82,7 @@
       "description": "Built traffic flow prediction system using spatio-temporal graph neural networks",
       "technologies": [
         "TensorFlow",
-        "Graph Neural Networks",
-        "Edge Devices"
+        "Edge devices"
       ]
     }
   ],
