@@ -5,9 +5,27 @@ const About = ({ name, education, contact }) => {
   // Extract first name
   const firstName = name.split(' ')[0];
   
-  // Get education details - now handles multiple education items
+  // Get education details - now properly handles multiple education items
   const hasEducation = education && education.length > 0;
   
+  // Get most recent graduation year for the experience badge
+  const getMostRecentGradYear = () => {
+    if (!hasEducation) return "";
+    
+    let mostRecentYear = "";
+    education.forEach(edu => {
+      const yearMatch = edu.graduation_date.match(/\d{4}/);
+      if (yearMatch) {
+        const year = yearMatch[0];
+        if (!mostRecentYear || parseInt(year) > parseInt(mostRecentYear)) {
+          mostRecentYear = year;
+        }
+      }
+    });
+    
+    return mostRecentYear;
+  };
+
   return (
     <section id="about" className="about-section">
       <div className="container">
@@ -25,7 +43,7 @@ const About = ({ name, education, contact }) => {
             </div>
             <div className="experience-badge">
               <span className="experience-number">
-                {hasEducation ? education[0].graduation_date.slice(-4) : ""}
+                {getMostRecentGradYear()}
               </span>
               <span className="experience-text">GRAD</span>
             </div>
@@ -47,19 +65,27 @@ const About = ({ name, education, contact }) => {
             {hasEducation && (
               <div className="education-highlight">
                 <h4>Education</h4>
-                {education.map((edu, index) => (
-                  <div className="education-card" key={index} style={index > 0 ? {marginTop: '15px'} : {}}>
-                    <div className="education-icon">
-                      <i className="edu-icon">🎓</i>
+                <div className="education-list">
+                  {education.map((edu, index) => (
+                    <div 
+                      className="education-card" 
+                      key={index} 
+                      style={{marginTop: index > 0 ? '20px' : '0', 
+                             paddingTop: index > 0 ? '20px' : '0',
+                             borderTop: index > 0 ? '1px solid var(--light-dark)' : 'none'}}
+                    >
+                      <div className="education-icon">
+                        <i className="edu-icon">🎓</i>
+                      </div>
+                      <div className="education-details">
+                        <h5>{edu.institution}</h5>
+                        <p className="degree">{edu.degree}</p>
+                        <p className="graduation">Graduation: {edu.graduation_date}</p>
+                        {edu.gpa && <p className="gpa">GPA: {edu.gpa}</p>}
+                      </div>
                     </div>
-                    <div className="education-details">
-                      <h5>{edu.institution}</h5>
-                      <p className="degree">{edu.degree}</p>
-                      <p className="graduation">Graduation: {edu.graduation_date}</p>
-                      {edu.gpa && <p className="gpa">GPA: {edu.gpa}</p>}
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             )}
             
