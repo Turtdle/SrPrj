@@ -11,7 +11,16 @@ const port = 3000;
 // Track which images have been checked
 let modernTemplateChecked = false;
 let professionalTemplateChecked = false;
-
+async function buildDockerImages() {
+  try {
+    await ensureTemplateImageExists('modern');
+    await ensureTemplateImageExists('professional');
+    console.log('Docker images ready');
+  } catch (error) {
+    console.error('Error building Docker images:', error);
+  }
+}
+buildDockerImages();
 // Ensure template images exist
 function ensureTemplateImageExists(templateName) {
     return new Promise((resolve, reject) => {
@@ -229,7 +238,6 @@ app.post('/upload', upload.single('docxFile'), async (req, res) => {
                     }
                 }
 
-                // Ensure data.json has the required structure
                 const validatedData = {
                     name: dataJsonObj.name || 'Professional Name',
                     contact: {
@@ -248,7 +256,6 @@ app.post('/upload', upload.single('docxFile'), async (req, res) => {
                     }
                 };
 
-                // Write the validated data back to data.json
                 fs.writeFileSync(dataJsonPath, JSON.stringify(validatedData, null, 2));
                 
                 const previewContent = JSON.stringify(validatedData).substring(0, 100);
@@ -256,42 +263,84 @@ app.post('/upload', upload.single('docxFile'), async (req, res) => {
                 
                 const uniqueContainerName = `resume-${containerId}`;
                 
-                // Use a different Docker command for professional template
-                let dockerRunCmd = '';
-                if (templateChoice === 'professional') {
-                    dockerRunCmd = `
-                    docker run -d -p ${containerPort}:80 --name ${uniqueContainerName} ${imageTag} && 
-                    docker cp ${dataJsonPath} ${uniqueContainerName}:/usr/share/nginx/html/data.json && 
-                    docker exec ${uniqueContainerName} sh -c "chmod 644 /usr/share/nginx/html/data.json && cat /usr/share/nginx/html/data.json > /tmp/data.json.copy && mv /tmp/data.json.copy /usr/share/nginx/html/data.json"
-                    `;
-                } else {
-                    dockerRunCmd = `
-                    docker run -d -p ${containerPort}:80 --name ${uniqueContainerName} ${imageTag} && 
-                    docker cp ${dataJsonPath} ${uniqueContainerName}:/usr/share/nginx/html/data.json && 
-                    docker exec ${uniqueContainerName} chmod 644 /usr/share/nginx/html/data.json
-                    `;
-                }
+                // Split into individual commands
+                const runContainerCmd = `docker run -d -p ${containerPort}:80 --name ${uniqueContainerName} ${imageTag}`;
+                const copyDataCmd = `docker cp ${dataJsonPath} ${uniqueContainerName}:/usr/share/nginx/html/data.json`;
+                const setPermissionsCmd = `docker exec ${uniqueContainerName} chmod 644 /usr/share/nginx/html/data.json`;
 
-                console.log(`Executing Docker command: ${dockerRunCmd}`);
-                exec(dockerRunCmd, (error, stdout, stderr) => {
+                // Execute commands one by one with proper error handling
+                console.log(`Executing container creation: ${runContainerCmd}`);
+                exec(runContainerCmd, (error, stdout, stderr) => {
                     if (error) {
-                        console.error(`Error with Docker commands: ${error.message}`);
+                        console.error(`Error creating container: ${error.message}`);
                         console.error(`Docker stderr: ${stderr}`);
-                        return res.status(500).send('Error launching container');
+                        return res.status(500).send('Error creating container');
                     }
                     
-                    activeContainers[containerId] = {
-                        id: stdout.trim(),
-                        port: containerPort,
-                        createdAt: new Date(),
-                        template: templateChoice
-                    };
+                    const containerId = stdout.trim();
+                    console.log(`Container created with ID: ${containerId}`);
                     
-                    res.json({
-                        success: true,
-                        containerId: containerId,
-                        url: `http://localhost:${containerPort}`,
-                        template: templateChoice
+                    console.log(`Executing file copy: ${copyDataCmd}`);
+                    exec(copyDataCmd, (error, stdout, stderr) => {
+                        if (error) {
+                            console.error(`Error copying data file: ${error.message}`);
+                            console.error(`Docker stderr: ${stderr}`);
+                            return res.status(500).send('Error copying data file to container');
+                        }
+                        
+                        console.log(`Data file copied successfully`);
+                        
+                        console.log(`Setting permissions: ${setPermissionsCmd}`);
+                        exec(setPermissionsCmd, (error, stdout, stderr) => {
+                            if (error) {
+                                console.error(`Error setting file permissions: ${error.message}`);
+                                console.error(`Docker stderr: ${stderr}`);
+                                
+                                // Add more detailed error inspection
+                                console.error(`Full error object:`, JSON.stringify(error, null, 2));
+                                
+                                // Check if container exists and get its status
+                                exec(`docker inspect ${uniqueContainerName}`, (inspectError, inspectOutput) => {
+                                    if (inspectError) {
+                                        console.error(`Container inspection error: ${inspectError.message}`);
+                                    } else {
+                                        console.log(`Container status: ${inspectOutput}`);
+                                    }
+                                    
+                                    // Try to execute a simple command to check if exec works at all
+                                    exec(`docker exec ${uniqueContainerName} ls -la /usr/share/nginx/html/`, (lsError, lsOutput, lsStderr) => {
+                                        if (lsError) {
+                                            console.error(`Error executing simple ls command: ${lsError.message}`);
+                                            console.error(`ls stderr: ${lsStderr}`);
+                                        } else {
+                                            console.log(`Directory listing: ${lsOutput}`);
+                                        }
+                                        
+                                        return res.status(500).send('Error setting file permissions - see server logs for details');
+                                    });
+                                });
+                            }
+                            
+                            console.log(`Permissions set successfully`);
+                            
+                            exec(`docker logs resume-${containerId}`, (logError, logOutput) => {
+                                console.log(`Container logs: ${logOutput}`);
+                                
+                                activeContainers[containerId] = {
+                                    id: containerId,
+                                    port: containerPort,
+                                    createdAt: new Date(),
+                                    template: templateChoice
+                                };
+                                
+                                res.json({
+                                    success: true,
+                                    containerId: containerId,
+                                    url: `http://localhost:${containerPort}`,
+                                    template: templateChoice
+                                });
+                            });
+                        });
                     });
                 });
             } catch (parseError) {

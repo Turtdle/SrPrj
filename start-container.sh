@@ -33,7 +33,7 @@ ls -la | tee -a $DEBUG_FILE
 log "Searching for data.json in various locations:"
 debug "Starting search for data.json files..."
 
-for location in "/usr/share/nginx/html/data.json" "/app/data.json" "/data.json" "/app/data/data.json" "data.json" "../data.json"; do
+for location in "/app/data.json" "/data.json" "/app/data/data.json" "data.json" "../data.json" "/usr/share/nginx/html/data.json"; do
   log "Checking $location"
   debug "Checking location: $location"
   
@@ -114,7 +114,7 @@ fi
 if [ -z "$DATA_JSON_PATH" ]; then
   log "Creating a placeholder data.json"
   debug "DATA_JSON_PATH is still empty, creating placeholder"
-  DATA_JSON_PATH="/usr/share/nginx/html/data.json"
+  DATA_JSON_PATH="/tmp/data.json"
   echo '{"name":"Test User","contact":{"email":"test@example.com","phone":"123-456-7890","location":"Anywhere, USA"},"education":[{"institution":"Test University","degree":"Test Degree","graduation_date":"2025","gpa":"4.0","relevant_coursework":["Course 1"]}],"experience":[{"position":"Test Position","company":"Test Company","duration":"2023-Present","location":"Test Location","responsibilities":["Test responsibility"]}],"skills":{"languages":["Test Language"],"tools":["Test Tool"]},"projects":[{"name":"Test Project","description":"Test Description","technologies":["Test Tech"]}]}' > "$DATA_JSON_PATH"
   log "Created placeholder at $DATA_JSON_PATH"
   debug "Placeholder created at $DATA_JSON_PATH"
@@ -141,32 +141,30 @@ else
   debug "Directory created, result: $?"
 fi
 
-if [ "$DATA_JSON_PATH" != "/usr/share/nginx/html/data.json" ]; then
-  log "Copying data.json to web directory"
-  debug "Copying from $DATA_JSON_PATH to /usr/share/nginx/html/data.json"
-  cp -v "$DATA_JSON_PATH" /usr/share/nginx/html/data.json 2>&1 | tee -a $LOGFILE $DEBUG_FILE
+log "Copying data.json to web directory"
+debug "Copying from $DATA_JSON_PATH to /usr/share/nginx/html/data.json"
+cp -v "$DATA_JSON_PATH" /usr/share/nginx/html/data.json 2>&1 | tee -a $LOGFILE $DEBUG_FILE
 
-  if [ $? -eq 0 ]; then
-    log "✓ Copy operation successful"
-    debug "Copy successful"
-    ls -la /usr/share/nginx/html/data.json | tee -a $LOGFILE $DEBUG_FILE
-  else
-    log "✗ ERROR: Copy operation failed with exit code $?"
-    debug "Copy failed with exit code $?"
-    debug "Source file exists: $([ -f "$DATA_JSON_PATH" ] && echo "Yes" || echo "No")"
-    debug "Source file is readable: $([ -r "$DATA_JSON_PATH" ] && echo "Yes" || echo "No")"
-    debug "Destination is writable: $([ -w "/usr/share/nginx/html/" ] && echo "Yes" || echo "No")"
-    
-    log "Trying cat method instead"
-    debug "Trying alternate copy method using cat"
-    cat "$DATA_JSON_PATH" > /usr/share/nginx/html/data.json 2>&1 | tee -a $LOGFILE $DEBUG_FILE
-    debug "Cat result: $?"
-    
-    if [ ! -f "/usr/share/nginx/html/data.json" ]; then
-      debug "File still not created, trying echo method"
-      echo "$(cat $DATA_JSON_PATH)" > /usr/share/nginx/html/data.json
-      debug "Echo result: $?"
-    fi
+if [ $? -eq 0 ]; then
+  log "✓ Copy operation successful"
+  debug "Copy successful"
+  ls -la /usr/share/nginx/html/data.json | tee -a $LOGFILE $DEBUG_FILE
+else
+  log "✗ ERROR: Copy operation failed with exit code $?"
+  debug "Copy failed with exit code $?"
+  debug "Source file exists: $([ -f "$DATA_JSON_PATH" ] && echo "Yes" || echo "No")"
+  debug "Source file is readable: $([ -r "$DATA_JSON_PATH" ] && echo "Yes" || echo "No")"
+  debug "Destination is writable: $([ -w "/usr/share/nginx/html/" ] && echo "Yes" || echo "No")"
+  
+  log "Trying cat method instead"
+  debug "Trying alternate copy method using cat"
+  cat "$DATA_JSON_PATH" > /usr/share/nginx/html/data.json 2>&1 | tee -a $LOGFILE $DEBUG_FILE
+  debug "Cat result: $?"
+  
+  if [ ! -f "/usr/share/nginx/html/data.json" ]; then
+    debug "File still not created, trying echo method"
+    echo "$(cat $DATA_JSON_PATH)" > /usr/share/nginx/html/data.json
+    debug "Echo result: $?"
   fi
 fi
 
@@ -204,6 +202,14 @@ if [ -f "/usr/share/nginx/html/data.json" ]; then
   if grep -q "Test User" /usr/share/nginx/html/data.json; then
     debug "WARNING: File appears to contain placeholder data (contains 'Test User')"
   fi
+  
+  if grep -q "test@example.com" /usr/share/nginx/html/data.json; then
+    debug "WARNING: File appears to contain placeholder data (contains 'test@example.com')"
+  fi
+  
+  if grep -q "sam@wanfamily.org" /usr/share/nginx/html/data.json; then
+    debug "GOOD: File appears to contain actual resume data (contains 'sam@wanfamily.org')"
+  fi
 else
   log "✗ ERROR: Destination file /usr/share/nginx/html/data.json does not exist after copy!"
   debug "Destination file does not exist after copy"
@@ -213,9 +219,9 @@ else
 fi
 
 log "Creating debug page"
-debug "Creating debug page"
+debug "Creating enhanced debug page"
 
-cat > /usr/share/nginx/html/debug.html << 'EOF'
+cat > /usr/share/nginx/html/debug.html << EOF
 <!DOCTYPE html>
 <html>
 <head>
@@ -224,33 +230,185 @@ cat > /usr/share/nginx/html/debug.html << 'EOF'
     body { font-family: monospace; padding: 20px; }
     pre { background: #f4f4f4; padding: 10px; overflow: auto; max-height: 500px; }
     h2 { margin-top: 30px; color: #333; }
+    .section { margin-bottom: 30px; border: 1px solid #ddd; padding: 15px; }
+    button { padding: 8px 16px; background: #4CAF50; color: white; border: none; cursor: pointer; }
+    button:hover { background: #45a049; }
+    .error { color: red; }
+    .success { color: green; }
   </style>
 </head>
 <body>
   <h1>Container Debug Information</h1>
-  <h2>Container Startup Log</h2>
-  <pre id="log"></pre>
-  <h2>Debug Log</h2>
-  <pre id="debugLog"></pre>
+  
+  <div class="section">
+    <h2>Current data.json Content</h2>
+    <pre id="json">Loading...</pre>
+    <button onclick="refreshJson()">Refresh JSON</button>
+  </div>
+  
+  <div class="section">
+    <h2>JSON Validation</h2>
+    <pre id="validation">Validating...</pre>
+  </div>
+  
+  <div class="section">
+    <h2>Container Startup Log</h2>
+    <pre id="log">Loading...</pre>
+    <button onclick="refreshLog()">Refresh Log</button>
+  </div>
+  
+  <div class="section">
+    <h2>Complete Debug Log</h2>
+    <pre id="debugLog">Loading...</pre>
+    <button onclick="refreshDebugLog()">Refresh Debug Log</button>
+  </div>
+  
+  <div class="section">
+    <h2>All Data Files Found</h2>
+    <pre id="files">Loading...</pre>
+    <button onclick="refreshFiles()">Refresh File List</button>
+  </div>
+  
+  <div class="section">
+    <h2>Manual Tests</h2>
+    <button onclick="testFilesystem()">Test Filesystem</button>
+    <pre id="filesystem-test">Run test to see results</pre>
+  </div>
   
   <script>
-    fetch('/container-startup.log')
-      .then(response => response.text())
-      .then(data => {
-        document.getElementById('log').textContent = data;
-      })
-      .catch(error => {
-        document.getElementById('log').textContent = 'Error fetching log: ' + error;
-      });
+    // Fetch and display the JSON
+    function refreshJson() {
+      document.getElementById('json').textContent = "Loading...";
+      fetch('/data.json')
+        .then(response => response.text())
+        .then(text => {
+          document.getElementById('json').textContent = text;
+          validateJson(text);
+        })
+        .catch(error => {
+          document.getElementById('json').textContent = 'Error fetching JSON: ' + error;
+        });
+    }
+    
+    function validateJson(jsonText) {
+      const validation = document.getElementById('validation');
+      try {
+        const data = JSON.parse(jsonText);
+        let results = "JSON is valid\\n\\n";
+        
+        // Check for expected fields
+        results += "Contains name field: "+ (data.name ? "✅ Yes: " + data.name : "❌ No") + "\\n";
+        results += "Contains contact field: " + (data.contact ? "✅ Yes" : "❌ No");
+        
+        if (data.contact) {
+          results += "\\nContact email: " + (data.contact.email || "missing");
+          results += "\\nContact phone: " + (data.contact.phone || "missing");
+          results += "\\nContact location: " + (data.contact.location || "missing");
+        }
+        
+        results += "\\nContains education field: " + (data.education ? "✅ Yes" : "❌ No");
+        if (data.education && data.education.length > 0) {
+          results += "\\nEducation count: " + data.education.length;
+          results += "\\nFirst education item has graduation_date: " + (data.education[0].graduation_date ? "✅ Yes" : "❌ No");
+          if (!data.education[0].graduation_date && data.education[0].graduationDate) {
+            results += "\\nWARNING: Found graduationDate instead of graduation_date!";
+          }
+        }
+        
+        results += "\\nContains experience field: " + (data.experience ? "✅ Yes" : "❌ No");
+        results += "\\nContains projects field: " + (data.projects ? "✅ Yes" : "❌ No");
+        results += "\\nContains skills field: " + (data.skills ? "✅ Yes" : "❌ No");
+        
+        // Placeholder detection
+        if (data.name === "Test User" || data.contact?.email === "test@example.com") {
+          results += "\\n\\n❌ WARNING: This appears to be placeholder data!";
+        } else if (data.name.includes("Samuel") || data.contact?.email.includes("sam@wanfamily.org")) {
+          results += "\\n\\n✅ GOOD: This appears to be the actual resume data";
+        }
+        
+        validation.textContent = results;
+      } catch (error) {
+        validation.innerHTML = "<span class='error'>Invalid JSON: " + error + "</span>";
+      }
+    }
+    
+    // Fetch and display the log
+    function refreshLog() {
+      document.getElementById('log').textContent = "Loading...";
+      fetch('/container-startup.log')
+        .then(response => response.text())
+        .then(data => {
+          document.getElementById('log').textContent = data;
+        })
+        .catch(error => {
+          document.getElementById('log').textContent = 'Error fetching log: ' + error;
+        });
+    }
+    
+    // Fetch and display the debug log
+    function refreshDebugLog() {
+      document.getElementById('debugLog').textContent = "Loading...";
+      fetch('/container-debug.log')
+        .then(response => response.text())
+        .then(data => {
+          document.getElementById('debugLog').textContent = data;
+        })
+        .catch(error => {
+          document.getElementById('debugLog').textContent = 'Error fetching debug log: ' + error;
+        });
+    }
+    
+    // Find all data.json files
+    function refreshFiles() {
+      document.getElementById('files').textContent = "Searching...";
+      fetch('/data-files.txt')
+        .then(response => response.text())
+        .then(data => {
+          document.getElementById('files').textContent = data || "No data.json files found";
+        })
+        .catch(error => {
+          document.getElementById('files').textContent = 'Error fetching file list: ' + error;
+        });
+    }
+    
+    // Filesystem test
+    function testFilesystem() {
+      const result = document.getElementById('filesystem-test');
+      result.textContent = "Running tests...";
       
-    fetch('/container-debug.log')
-      .then(response => response.text())
-      .then(data => {
-        document.getElementById('debugLog').textContent = data;
-      })
-      .catch(error => {
-        document.getElementById('debugLog').textContent = 'Error fetching debug log: ' + error;
-      });
+      // Create a series of tests
+      const tests = [
+        () => fetch('/data.json').then(r => r.status === 200 ? "✅ data.json exists" : "❌ data.json not found"),
+        () => fetch('/container-startup.log').then(r => r.status === 200 ? "✅ log exists" : "❌ log not found"),
+        () => fetch('/data.json')
+          .then(r => r.text())
+          .then(text => {
+            try {
+              const data = JSON.parse(text);
+              return data.name === "Test User" 
+                ? "❌ data.json contains placeholder data" 
+                : "✅ data.json contains real data";
+            } catch (e) {
+              return "❌ data.json is not valid JSON: " + e;
+            }
+          })
+      ];
+      
+      // Run all tests and combine results
+      Promise.all(tests.map(test => test().catch(e => "Error: " + e)))
+        .then(results => {
+          result.textContent = results.join("\\n");
+        })
+        .catch(error => {
+          result.textContent = "Test error: " + error;
+        });
+    }
+    
+    // Initial data load
+    refreshJson();
+    refreshLog();
+    refreshDebugLog();
+    refreshFiles();
   </script>
 </body>
 </html>
@@ -262,6 +420,17 @@ cp $LOGFILE /usr/share/nginx/html/container-startup.log
 cp $DEBUG_FILE /usr/share/nginx/html/container-debug.log
 chmod 644 /usr/share/nginx/html/container-startup.log /usr/share/nginx/html/container-debug.log
 
+log "Finding all data.json files in the container"
+debug "Finding all data.json files in the container"
+find / -name "data.json" -type f 2>/dev/null > /usr/share/nginx/html/data-files.txt
+chmod 644 /usr/share/nginx/html/data-files.txt
+
+if [ -f "/usr/share/nginx/html/data.json" ]; then
+  TIMESTAMP=$(date +%Y%m%d%H%M%S)
+  cp /usr/share/nginx/html/data.json /usr/share/nginx/html/data.json.${TIMESTAMP}
+  debug "Created backup copy at data.json.${TIMESTAMP}"
+fi
+
 log "Starting nginx..."
 debug "Starting nginx..."
-exec nginx -g "daemon off;"
+nginx -g "daemon off;"

@@ -1,97 +1,127 @@
 {
-  "name": "ALEX JORDAN",
+  "name": "EMILY RODRIGUEZ",
   "contact": {
-    "location": "San Francisco, CA 94110",
-    "phone": "(415) 555-9876",
-    "email": "ajordan@emaildomain.com"
+    "location": "Mountain View, CA 94043",
+    "phone": "(650) 123-4567",
+    "email": "emily.rodriguez@example.com",
+    "linkedin": "linkedin.com/in/emilyrodriguez"
   },
   "education": [
     {
-      "institution": "UNIVERSITY OF CALIFORNIA, BERKELEY",
-      "degree": "Bachelor of Arts in Communications with Minor in Business Administration",
-      "graduation_date": "May 2016",
-      "gpa": "3.8/4.0",
+      "institution": "MASSACHUSETTS INSTITUTE OF TECHNOLOGY (MIT)",
+      "degree": "Master of Science in Computer Science - Artificial Intelligence",
+      "graduation_date": "December 2023",
+      "gpa": "3.94/4.0",
+      "relevant_coursework": []
+    },
+    {
+      "institution": "UNIVERSITY OF ILLINOIS URBANA-CHAMPAIGN",
+      "degree": "Bachelor of Science in Statistics with Computer Science minor",
+      "graduation_date": "May 2021",
+      "gpa": "3.88/4.0",
       "relevant_coursework": []
     }
   ],
   "experience": [
     {
-      "position": "DIGITAL MARKETING MANAGER",
-      "company": "Elevate Marketing Agency",
-      "location": "San Francisco, CA",
-      "duration": "March 2021 - Present",
+      "position": "Machine Learning Engineer",
+      "company": "NVIDIA",
+      "location": "Santa Clara, CA",
+      "duration": "January 2024 - Present",
       "responsibilities": [
-        "Lead digital marketing strategy for 12+ clients across B2B and B2C industries, resulting in 45% average growth in online revenue",
-        "Manage $1.2M annual digital advertising budget while maintaining ROI above 300%",
-        "Oversee team of 6 marketing specialists, content creators, and PPC managers",
-        "Implemented automated marketing dashboard reducing reporting time by 65%",
-        "Developed content marketing strategy that increased organic traffic by 78% YOY",
-        "Redesigned email marketing campaigns improving open rates from 18% to 32%"
+        "Develop and optimize deep learning models for computer vision applications",
+        "Implement CUDA optimizations that improved training speed by 35%",
+        "Collaborate with research team on next-generation AI architectures",
+        "Created automated CI/CD pipeline for model deployment using Kubernetes"
       ]
     },
     {
-      "position": "SENIOR MARKETING SPECIALIST",
-      "company": "TechGrowth Solutions",
-      "location": "Oakland, CA",
-      "duration": "January 2018 - February 2021",
+      "position": "Data Science Intern",
+      "company": "APPLE",
+      "location": "Cupertino, CA",
+      "duration": "June 2022 - December 2023",
       "responsibilities": [
-        "Created and executed comprehensive digital marketing plans for SaaS clients",
-        "Managed social media accounts growing collective following from 25K to 150K",
-        "Led rebranding initiative that improved brand recognition by 60% according to market research",
-        "Optimized landing pages increasing conversion rate by 35%",
-        "Collaborated with sales team to develop lead nurturing workflows raising qualified lead generation by 42%",
-        "Conducted A/B testing across campaigns to identify highest performing content"
+        "Designed recommendation algorithms for Apple Music that increased user engagement by 12%",
+        "Built data pipelines processing over 15TB of daily user interaction data",
+        "Created visualization dashboards for executive reporting using Tableau",
+        "Implemented A/B testing framework for feature evaluation"
       ]
     },
     {
-      "position": "MARKETING COORDINATOR",
-      "company": "InnovateBay Inc.",
-      "location": "San Jose, CA",
-      "duration": "August 2016 - December 2017",
+      "position": "Software Engineering Intern",
+      "company": "AMAZON",
+      "location": "Seattle, WA",
+      "duration": "May 2021 - August 2021",
       "responsibilities": [
-        "Assisted in coordinating marketing campaigns across digital and traditional channels",
-        "Managed company social media accounts and created engaging content calendar",
-        "Helped organize 6 industry events with average attendance of 300+ professionals",
-        "Supported design team in creating marketing collateral for products and services",
-        "Monitored campaign performance and prepared monthly analytics reports"
+        "Built microservices for inventory management system using Java and AWS",
+        "Developed REST APIs handling over 5,000 requests per minute",
+        "Optimized database queries reducing latency by 27%",
+        "Participated in agile development process and code reviews"
       ]
     }
   ],
   "projects": [
     {
-      "name": "SUSTAINABLE FASHION BRAND LAUNCH",
-      "description": "Developed complete digital marketing strategy for eco-friendly fashion startup. Created brand identity, messaging, and positioning in competitive market. Implemented social media strategy resulting in 25K followers pre-launch. Designed influencer marketing program with 85% engagement rate.",
+      "name": "MULTIMODAL HEALTHCARE DIAGNOSTICS SYSTEM",
+      "description": "Developed an AI system that analyzes medical images, patient history, and lab results",
       "technologies": [
-        "Social Media"
+        "PyTorch",
+        "Federated learning"
       ]
     },
     {
-      "name": "SAAS PRODUCT MARKETING CAMPAIGN",
-      "description": "Led marketing campaign for enterprise software launch generating $1.2M in first-quarter sales. Developed content marketing strategy including whitepaper, case studies, and blog series. Created and optimized PPC campaigns with 4.5% CTR (industry average: 1.91%). Implemented marketing automation workflows for lead nurturing.",
+      "name": "EXPLAINABLE AI FRAMEWORK",
+      "description": "Created a framework for generating human-understandable explanations for complex ML models",
       "technologies": [
-        "Content Marketing"
+        "LIME",
+        "SHAP",
+        "custom attribution methods"
+      ]
+    },
+    {
+      "name": "SMART CITY TRAFFIC OPTIMIZATION",
+      "description": "Built traffic flow prediction system using spatio-temporal graph neural networks",
+      "technologies": [
+        "TensorFlow",
+        "Graph neural networks",
+        "Edge devices"
       ]
     }
   ],
   "skills": {
     "languages": [
-      "English (Native)",
-      "Spanish (Professional Working Proficiency)",
-      "French (Conversational)"
+      "Python",
+      "R",
+      "SQL",
+      "Julia",
+      "Java",
+      "C++",
+      "JavaScript"
     ],
     "tools": [
-      "Digital Marketing Strategy",
-      "SEO/SEM & Paid Search",
-      "Content Marketing & Creation",
-      "Social Media Management",
-      "Email Marketing Campaigns",
-      "Marketing Automation",
-      "Google Analytics & Data Studio",
-      "Conversion Rate Optimization",
-      "Adobe Creative Suite",
-      "HubSpot, Marketo, Mailchimp",
-      "A/B Testing & Optimization",
-      "WordPress & Web Development"
+      "PyTorch",
+      "TensorFlow",
+      "scikit-learn",
+      "Pandas",
+      "NumPy",
+      "Hugging Face",
+      "AWS",
+      "Google Cloud",
+      "Hadoop",
+      "Spark",
+      "Kafka",
+      "Airflow",
+      "Tableau",
+      "PowerBI",
+      "Matplotlib",
+      "D3.js",
+      "Plotly",
+      "Git",
+      "Docker",
+      "Kubernetes",
+      "Linux",
+      "Jupyter",
+      "VS Code"
     ]
   }
 }
