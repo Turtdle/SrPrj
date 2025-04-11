@@ -4,19 +4,30 @@ RUN apk add --update nodejs npm
 
 WORKDIR /app
 
+# Copy package.json files first
 COPY professional-template/package*.json ./
 
+# Install dependencies
 RUN npm install
 
+# Copy the rest of the app
 COPY professional-template/public ./public
 COPY professional-template/src ./src
 
+# Set environment variable to prevent browser opening
 ENV BROWSER=none
 
+# Build the React app
 RUN npm run build
 
+# Copy the built app to Nginx's serve directory
 RUN cp -r build/* /usr/share/nginx/html/
 
+# Create empty data.json to prevent initial errors
+RUN echo '{"name":"Loading...","contact":{"location":"","phone":"","email":""},"education":[],"experience":[],"projects":[],"skills":{"languages":[],"tools":[]}}' > /usr/share/nginx/html/data.json && \
+    chmod 644 /usr/share/nginx/html/data.json
+
+# Create log directories
 RUN mkdir -p /var/log && \
     touch /var/log/container-startup.log /var/log/container-debug.log && \
     chmod 666 /var/log/container-startup.log /var/log/container-debug.log
@@ -29,7 +40,18 @@ RUN chmod +x /start-container.sh && \
     # Convert CRLF to LF (in case it was created on Windows)
     sed -i 's/\r$//' /start-container.sh
 
-# Set the entrypoint to the script
-ENTRYPOINT ["/start-container.sh"]
+# Create a script to handle data.json issues
+RUN echo '#!/bin/sh\n\
+if [ ! -f "/usr/share/nginx/html/data.json" ] || [ ! -s "/usr/share/nginx/html/data.json" ]; then\n\
+  echo "Creating default data.json"\n\
+  echo "{\"name\":\"Default Profile\",\"contact\":{\"location\":\"Location\",\"phone\":\"Phone\",\"email\":\"email@example.com\"},\"education\":[{\"institution\":\"University\",\"degree\":\"Degree\",\"graduation_date\":\"Date\",\"gpa\":\"\",\"relevant_coursework\":[]}],\"experience\":[{\"position\":\"Position\",\"company\":\"Company\",\"location\":\"Location\",\"duration\":\"Duration\",\"responsibilities\":[\"Responsibility\"]}],\"projects\":[{\"name\":\"Project\",\"description\":\"Description\",\"technologies\":[\"Technology\"]}],\"skills\":{\"languages\":[\"Language\"],\"tools\":[\"Tool\"]}}"\
+  > /usr/share/nginx/html/data.json\n\
+  chmod 644 /usr/share/nginx/html/data.json\n\
+fi\n\
+exec /start-container.sh\n' > /usr/local/bin/ensure-data.sh && \
+    chmod +x /usr/local/bin/ensure-data.sh
+
+# Set the entrypoint to the wrapper script
+ENTRYPOINT ["/usr/local/bin/ensure-data.sh"]
 
 EXPOSE 80

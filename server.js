@@ -171,14 +171,7 @@ app.post('/upload', upload.single('docxFile'), async (req, res) => {
                 console.error(`Warning: chmod failed: ${chmodError.message}`);
             }
             
-            const uniqueContainerName = `resume-${containerId}`;
-            const dockerRunCmd = `
-            docker run -d -p ${containerPort}:80 --name ${uniqueContainerName} ${imageTag} && 
-            docker cp ${path.join(containerDir, 'data.json')} ${uniqueContainerName}:/usr/share/nginx/html/data.json && 
-            docker exec ${uniqueContainerName} chmod 644 /usr/share/nginx/html/data.json
-            `;
-
-            console.log(`Executing Docker command: ${dockerRunCmd}`);
+            // Read and validate the generated data.json file
             const dataJsonPath = path.join(containerDir, 'data.json');
             if (!fs.existsSync(dataJsonPath)) {
                 console.error(`Error: data.json not found at ${dataJsonPath}`);
@@ -193,29 +186,118 @@ app.post('/upload', upload.single('docxFile'), async (req, res) => {
 
             console.log(`Verified data.json exists (${fileSize} bytes)`);
 
-            const previewContent = fs.readFileSync(dataJsonPath, 'utf8').substring(0, 100);
-            console.log(`Data preview: ${previewContent}...`);
-            exec(dockerRunCmd, (error, stdout, stderr) => {
-                if (error) {
-                    console.error(`Error with Docker commands: ${error.message}`);
-                    console.error(`Docker stderr: ${stderr}`);
-                    return res.status(500).send('Error launching container');
+            // Parse and enhance the data.json content
+            try {
+                const dataJsonContent = fs.readFileSync(dataJsonPath, 'utf8');
+                const dataJsonObj = JSON.parse(dataJsonContent);
+                
+                // Make sure project technologies are populated
+                if (dataJsonObj.projects) {
+                    for (const project of dataJsonObj.projects) {
+                        if (!project.technologies || project.technologies.length === 0) {
+                            // Identify potential technologies from description
+                            const description = project.description || '';
+                            const tech = [];
+                            
+                            // Extract technologies based on common keywords in the description
+                            if (description.toLowerCase().includes('marketing')) {
+                                tech.push('Digital Marketing', 'Content Strategy');
+                            }
+                            if (description.toLowerCase().includes('social media')) {
+                                tech.push('Social Media');
+                            }
+                            if (description.toLowerCase().includes('campaign')) {
+                                tech.push('Campaign Management');
+                            }
+                            if (description.toLowerCase().includes('design')) {
+                                tech.push('Design');
+                            }
+                            if (description.toLowerCase().includes('content')) {
+                                tech.push('Content Creation');
+                            }
+                            if (description.toLowerCase().includes('analytics') || description.toLowerCase().includes('data')) {
+                                tech.push('Analytics');
+                            }
+                            
+                            // If we still have no technologies, add some generic ones based on the project name
+                            if (tech.length === 0) {
+                                tech.push('Project Management', 'Professional Skills');
+                            }
+                            
+                            project.technologies = tech;
+                        }
+                    }
                 }
-                
-                activeContainers[containerId] = {
-                    id: stdout.trim(),
-                    port: containerPort,
-                    createdAt: new Date(),
-                    template: templateChoice
+
+                // Ensure data.json has the required structure
+                const validatedData = {
+                    name: dataJsonObj.name || 'Professional Name',
+                    contact: {
+                        location: (dataJsonObj.contact && dataJsonObj.contact.location) || 'Location',
+                        phone: (dataJsonObj.contact && dataJsonObj.contact.phone) || 'Phone',
+                        email: (dataJsonObj.contact && dataJsonObj.contact.email) || 'Email'
+                    },
+                    education: Array.isArray(dataJsonObj.education) ? dataJsonObj.education : [],
+                    experience: Array.isArray(dataJsonObj.experience) ? dataJsonObj.experience : [],
+                    projects: Array.isArray(dataJsonObj.projects) ? dataJsonObj.projects : [],
+                    skills: {
+                        languages: (dataJsonObj.skills && Array.isArray(dataJsonObj.skills.languages)) 
+                            ? dataJsonObj.skills.languages : [],
+                        tools: (dataJsonObj.skills && Array.isArray(dataJsonObj.skills.tools)) 
+                            ? dataJsonObj.skills.tools : []
+                    }
                 };
+
+                // Write the validated data back to data.json
+                fs.writeFileSync(dataJsonPath, JSON.stringify(validatedData, null, 2));
                 
-                res.json({
-                    success: true,
-                    containerId: containerId,
-                    url: `http://localhost:${containerPort}`,
-                    template: templateChoice
+                const previewContent = JSON.stringify(validatedData).substring(0, 100);
+                console.log(`Data preview after validation: ${previewContent}...`);
+                
+                const uniqueContainerName = `resume-${containerId}`;
+                
+                // Use a different Docker command for professional template
+                let dockerRunCmd = '';
+                if (templateChoice === 'professional') {
+                    dockerRunCmd = `
+                    docker run -d -p ${containerPort}:80 --name ${uniqueContainerName} ${imageTag} && 
+                    docker cp ${dataJsonPath} ${uniqueContainerName}:/usr/share/nginx/html/data.json && 
+                    docker exec ${uniqueContainerName} sh -c "chmod 644 /usr/share/nginx/html/data.json && cat /usr/share/nginx/html/data.json > /tmp/data.json.copy && mv /tmp/data.json.copy /usr/share/nginx/html/data.json"
+                    `;
+                } else {
+                    dockerRunCmd = `
+                    docker run -d -p ${containerPort}:80 --name ${uniqueContainerName} ${imageTag} && 
+                    docker cp ${dataJsonPath} ${uniqueContainerName}:/usr/share/nginx/html/data.json && 
+                    docker exec ${uniqueContainerName} chmod 644 /usr/share/nginx/html/data.json
+                    `;
+                }
+
+                console.log(`Executing Docker command: ${dockerRunCmd}`);
+                exec(dockerRunCmd, (error, stdout, stderr) => {
+                    if (error) {
+                        console.error(`Error with Docker commands: ${error.message}`);
+                        console.error(`Docker stderr: ${stderr}`);
+                        return res.status(500).send('Error launching container');
+                    }
+                    
+                    activeContainers[containerId] = {
+                        id: stdout.trim(),
+                        port: containerPort,
+                        createdAt: new Date(),
+                        template: templateChoice
+                    };
+                    
+                    res.json({
+                        success: true,
+                        containerId: containerId,
+                        url: `http://localhost:${containerPort}`,
+                        template: templateChoice
+                    });
                 });
-            });
+            } catch (parseError) {
+                console.error(`Error parsing or validating data.json: ${parseError.message}`);
+                return res.status(500).send('Error processing resume data');
+            }
         });
     });
 });

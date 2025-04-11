@@ -65,7 +65,7 @@ message = client.messages.create(
             "content": [
                 {
                     "type": "text",
-                    "text": "Please convert this doc into json, seperating the resume into parts such as {experience : [experience], education : [education], etc}: " + resume_text
+                    "text": "Please convert this doc into json, separating the resume into parts such as {experience : [experience], education : [education], etc}: " + resume_text
                     + "please make sure to fill out these fields exactly; If you are missing information leave it blank but still include the field:\n\n"
                     + str(format_json)
                 }
@@ -163,10 +163,36 @@ def transform_to_react_format(input_dict):
     
     projects_data = input_dict.get("projects", input_dict.get("software_projects", []))
     for proj in projects_data:
+        # Extract technologies from description if not provided
+        technologies = proj.get("technologies", [])
+        
+        # If technologies is empty, try to identify some from the description
+        if not technologies and "description" in proj:
+            description = proj.get("description", "")
+            # List of common technologies to check for in description
+            common_techs = [
+                "HTML", "CSS", "JavaScript", "React", "Angular", "Vue", "Node.js",
+                "Python", "Java", "C++", "PHP", "WordPress", "AWS", "Azure",
+                "Google Cloud", "Docker", "Kubernetes", "SQL", "NoSQL", "MongoDB",
+                "Firebase", "Redux", "GraphQL", "REST API", "jQuery", "Bootstrap",
+                "Tailwind", "SEO", "SEM", "Social Media", "Content Marketing",
+                "Email Marketing", "Google Analytics", "Adobe Creative Suite",
+                "HubSpot", "Marketo", "Mailchimp", "A/B Testing"
+            ]
+            
+            # Extract technologies mentioned in the description
+            extracted_techs = [tech for tech in common_techs if tech.lower() in description.lower()]
+            
+            # For empty technologies, create a simple default set if it's a marketing project
+            if not extracted_techs and ("marketing" in description.lower() or "campaign" in description.lower()):
+                extracted_techs = ["Digital Marketing", "Content Strategy", "Analytics"]
+                
+            technologies = extracted_techs
+        
         project_item = {
             "name": proj.get("name", ""),
             "description": proj.get("description", ""),
-            "technologies": proj.get("technologies", [])
+            "technologies": technologies
         }
         result["projects"].append(project_item)
     
@@ -202,5 +228,24 @@ for location in locations:
         print(f"Successfully wrote JSON to: {location}")
     except Exception as e:
         print(f"Error writing to {location}: {e}")
+
+# Create a duplicate specifically for the professional template
+professional_locations = [
+    "/usr/share/nginx/html/data.json",
+    "/professional-template/public/data.json",
+    "/professional-data.json"
+]
+
+for location in professional_locations:
+    try:
+        parent_dir = os.path.dirname(location)
+        if parent_dir and not os.path.exists(parent_dir):
+            os.makedirs(parent_dir, exist_ok=True)
+            
+        with open(location, "w") as json_file:
+            json.dump(transformed_dict, json_file, indent=2)
+        print(f"Successfully wrote JSON for professional template to: {location}")
+    except Exception as e:
+        print(f"Error writing to professional template location {location}: {e}")
 
 print("Successfully created resume JSON")

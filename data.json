@@ -61,12 +61,16 @@
     {
       "name": "SUSTAINABLE FASHION BRAND LAUNCH",
       "description": "Developed complete digital marketing strategy for eco-friendly fashion startup. Created brand identity, messaging, and positioning in competitive market. Implemented social media strategy resulting in 25K followers pre-launch. Designed influencer marketing program with 85% engagement rate.",
-      "technologies": []
+      "technologies": [
+        "Social Media"
+      ]
     },
     {
       "name": "SAAS PRODUCT MARKETING CAMPAIGN",
       "description": "Led marketing campaign for enterprise software launch generating $1.2M in first-quarter sales. Developed content marketing strategy including whitepaper, case studies, and blog series. Created and optimized PPC campaigns with 4.5% CTR (industry average: 1.91%). Implemented marketing automation workflows for lead nurturing.",
-      "technologies": []
+      "technologies": [
+        "Content Marketing"
+      ]
     }
   ],
   "skills": {
