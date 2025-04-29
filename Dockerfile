@@ -16,3 +16,5 @@ RUN mkdir -p uploads container-data
 EXPOSE 3000
 
 CMD ["node", "server.js"]
+
+aws ec2 authorize-security-group-ingress --group-id sg-0713bc56a8ada96a0 --protocol tcp --port 3000 --cidr 0.0.0.0/0

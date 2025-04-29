@@ -125,13 +125,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
                 
                 if (data.success) {
+                    const serverUrl = data.url.replace('localhost', window.location.hostname);
                     resultArea.innerHTML = `
                         <p style="color: green;">Success! Your resume website is ready!</p>
-                        <a href="${data.url}" target="_blank" class="btn-primary">View Your Resume Website</a>
+                        <a href="${serverUrl}" target="_blank" class="btn-primary">View Your Resume Website</a>
                         <p><small>Template: ${data.template}</small></p>
                         <p><small>Container ID: ${data.containerId}</small></p>
                         <p><small>This website will be available for 24 hours</small></p>
+                        <p><small>If the link doesn't work, try <a href="${data.url}" target="_blank">direct URL</a></small></p>
+                        <p><small>Server: ${window.location.hostname}</small></p>
                     `;
+
                 } else {
                     resultArea.innerHTML = `<p style="color: red;">Error: ${data.message || 'Unknown error'}</p>`;
                 }

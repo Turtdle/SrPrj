@@ -5,18 +5,19 @@ services:
     build: .
     ports:
       - "3000:3000"
+      - "8000-9000:8000-9000"  # Range for dynamically assigned container ports
     volumes:
       - ./:/app
       - /app/node_modules
       - /var/run/docker.sock:/var/run/docker.sock
-    env_file:
-      - .env
     environment:
       - NODE_ENV=production
+      - EC2_PUBLIC_IP=
     restart: unless-stopped
     container_name: resume-generator-main
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
-  # Uncomment to build the fixed professional template image
   professional-resume-builder:
     build:
       context: .

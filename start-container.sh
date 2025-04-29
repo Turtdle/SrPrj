@@ -13,10 +13,19 @@ debug() {
   echo "[DEBUG] $(date): $1" | tee -a $DEBUG_FILE
 }
 
+SERVER_HOST=${SERVER_HOST:-localhost}
+log() {
+  echo "[$(date)] $1" | tee -a $LOGFILE
+}
+
+debug() {
+  echo "[DEBUG] $(date): $1" | tee -a $DEBUG_FILE
+}
+
 log "===== CONTAINER STARTUP DEBUG ====="
 log "Container started with the following environment:"
 env | grep -v PASSWORD | grep -v KEY | sort >> $LOGFILE
-
+log "Using SERVER_HOST: ${SERVER_HOST}"
 debug "Creating complete inventory of filesystem:"
 find / -type f -name "*.json" 2>/dev/null | tee -a $DEBUG_FILE
 debug "All mounted volumes:"

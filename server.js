@@ -5,6 +5,7 @@ const { exec } = require('child_process');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 
+const os = require('os');
 const app = express();
 const port = 3000;
 
@@ -65,6 +66,34 @@ function ensureTemplateImageExists(templateName) {
         });
     });
 }
+  
+
+function getServerPublicIP() {
+    // Check if EC2_PUBLIC_IP environment variable is set
+    if (process.env.EC2_PUBLIC_IP) {
+      return process.env.EC2_PUBLIC_IP;
+    }
+    
+    // Try to determine IP from network interfaces
+    const interfaces = os.networkInterfaces();
+    let publicIP = null;
+    
+    // Look for a non-internal IPv4 address
+    Object.keys(interfaces).forEach((ifname) => {
+      interfaces[ifname].forEach((iface) => {
+        if (iface.family === 'IPv4' && !iface.internal) {
+          publicIP = iface.address;
+        }
+      });
+    });
+    return publicIP || 'localhost';
+}
+const serverConfig = {
+    port: process.env.PORT || 3000,
+    publicIP: getServerPublicIP()
+  };
+  
+  console.log(`Server will use public IP: ${serverConfig.publicIP}`);
   
 function findPythonInterpreter() {
     const inDocker = fs.existsSync('/.dockerenv');
@@ -264,7 +293,7 @@ app.post('/upload', upload.single('docxFile'), async (req, res) => {
                 const uniqueContainerName = `resume-${containerId}`;
                 
                 // Split into individual commands
-                const runContainerCmd = `docker run -d -p ${containerPort}:80 --name ${uniqueContainerName} ${imageTag}`;
+                const runContainerCmd = `docker run -d -p ${containerPort}:80 --name ${uniqueContainerName} --add-host=host.docker.internal:host-gateway -e SERVER_HOST=${serverConfig.publicIP} ${imageTag}`;
                 const copyDataCmd = `docker cp ${dataJsonPath} ${uniqueContainerName}:/usr/share/nginx/html/data.json`;
                 const setPermissionsCmd = `docker exec ${uniqueContainerName} chmod 644 /usr/share/nginx/html/data.json`;
 
@@ -336,9 +365,9 @@ app.post('/upload', upload.single('docxFile'), async (req, res) => {
                                 res.json({
                                     success: true,
                                     containerId: containerId,
-                                    url: `http://localhost:${containerPort}`,
+                                    url: `http://${serverConfig.publicIP}:${containerPort}`,
                                     template: templateChoice
-                                });
+                                  });                                  
                             });
                         });
                     });
@@ -355,11 +384,11 @@ app.get('/container/:id', (req, res) => {
     const containerId = req.params.id;
     if (activeContainers[containerId]) {
         res.json({
-            active: true,
-            url: `http://localhost:${activeContainers[containerId].port}`,
-            template: activeContainers[containerId].template || 'modern'
+          active: true,
+          url: `http://${serverConfig.publicIP}:${activeContainers[containerId].port}`,
+          template: activeContainers[containerId].template || 'modern'
         });
-    } else {
+      } else {
         res.json({ active: false });
     }
 });
@@ -379,7 +408,7 @@ setInterval(() => {
     });
 }, 3600000);
 
-app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+app.listen(serverConfig.port, '0.0.0.0', () => {
+    console.log(`Server running at http://${serverConfig.publicIP}:${serverConfig.port}`);
     console.log(`Using Python interpreter: ${PYTHON_PATH}`);
-});
+  });
