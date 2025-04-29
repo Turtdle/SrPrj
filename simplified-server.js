@@ -13,15 +13,20 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/resumes', express.static(path.join(__dirname, 'resumes')));
 app.use(express.json());
 
+// Configure templates directory
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
+
 // Set up multer for file uploads
 const upload = multer({ dest: 'uploads/' });
 
 // Track active resumes
 const activeResumes = {};
 
-// Configure templates directory
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
+// Add root route handler for the homepage
+app.get('/', (req, res) => {
+  res.render('index');
+});
 
 // Process the uploaded resume file
 app.post('/upload', upload.single('docxFile'), async (req, res) => {
@@ -164,6 +169,9 @@ app.post('/upload', upload.single('docxFile'), async (req, res) => {
                 const destCssFile = path.join(cssDir, 'style.css');
                 fs.copyFileSync(sourceCssFile, destCssFile);
                 
+                // Save template type
+                fs.writeFileSync(path.join(resumeDir, 'template-type.txt'), templateChoice);
+                
                 // Register the active resume
                 activeResumes[resumeId] = {
                     id: resumeId,
@@ -219,9 +227,9 @@ app.get('/resume/:id', (req, res) => {
                 
                 // Determine template from directory structure or default to modern
                 let template = 'modern';
-                const templatesDir = path.join(__dirname, 'resumes', resumeId, 'template-type.txt');
-                if (fs.existsSync(templatesDir)) {
-                    template = fs.readFileSync(templatesDir, 'utf8').trim();
+                const templateTypePath = path.join(__dirname, 'resumes', resumeId, 'template-type.txt');
+                if (fs.existsSync(templateTypePath)) {
+                    template = fs.readFileSync(templateTypePath, 'utf8').trim();
                 }
                 
                 // Add to active resumes
