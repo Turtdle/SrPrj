@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= resume.name %> | Resume</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/resumes/<%= resumeId %>/css/style.css">
+    <style>
+        /* Additional custom styles */
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #93c5fd;
+            --secondary: #ec4899;
+            --accent: #8b5cf6;
+            --dark: #1e293b;
+            --dark-light: #334155;
+            --light: #f1f5f9;
+            --light-dark: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text: #0f172a;
+            --text-light: #64748b;
+            --white: #ffffff;
+            --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            --box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s ease;
+            --border-radius: 8px;
+            --container-width: 1200px;
+            --section-padding: 100px 0;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            padding-top: 80px;
+        }
+        
+        /* Adjust container for direct HTML rendering */
+        .container {
+            width: 100%;
+            max-width: var(--container-width);
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="site-header">
+        <div class="container header-container">
+            <div class="logo">
+                <span class="name-initial"><%= resume.name.charAt(0) %></span>
+                <span class="full-name"><%= resume.name.split(' ')[0] %></span>
+            </div>
+
+            <nav class="desktop-nav">
+                <ul>
+                    <li><a href="#hero" class="active">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#experience">Experience</a></li>
+                    <li><a href="#projects">Projects</a></li>
+                    <li><a href="#skills">Skills</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+            
+            <button class="mobile-menu-btn" aria-label="Mobile Menu">
+                <span class="menu-icon"></span>
+            </button>
+
+            <div class="mobile-menu">
+                <ul>
+                    <li><a href="#hero" class="active">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#experience">Experience</a></li>
+                    <li><a href="#projects">Projects</a></li>
+                    <li><a href="#skills">Skills</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section id="hero" class="hero-section">
+            <div class="container hero-container">
+                <div class="hero-content">
+                    <div class="animated-intro">
+                        <h1>
+                            <div class="hello-text">Hello, I'm</div>
+                            <div class="name-text"><%= resume.name %></div>
+                            <div class="role-text">
+                                <span class="typing-text">
+                                    <% if (resume.education && resume.education.length > 0) { %>
+                                        <%= resume.education[0].degree %>
+                                    <% } else { %>
+                                        Professional
+                                    <% } %>
+                                </span>
+                                <span class="cursor">|</span>
+                            </div>
+                        </h1>
+                        
+                        <div class="hero-details">
+                            <p>I build innovative solutions and create impactful results.</p>
+                        </div>
+                        
+                        <div class="hero-buttons">
+                            <button class="primary-btn" onclick="document.getElementById('contact').scrollIntoView({behavior: 'smooth'})">
+                                Contact Me
+                            </button>
+                            <button class="secondary-btn" onclick="document.getElementById('projects').scrollIntoView({behavior: 'smooth'})">
+                                View Projects
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="hero-visual">
+                        <div class="profile-shape">
+                            <span class="profile-initial"><%= resume.name.charAt(0) %></span>
+                        </div>
+                        <div class="floating-shapes">
+                            <div class="shape shape-1"></div>
+                            <div class="shape shape-2"></div>
+                            <div class="shape shape-3"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="scroll-indicator">
+                    <div class="mouse">
+                        <div class="wheel"></div>
+                    </div>
+                    <div class="arrow-down">
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="about-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>About Me</h2>
+                    <div class="section-bar"></div>
+                </div>
+                
+                <div class="about-content">
+                    <div class="about-image">
+                        <div class="image-frame">
+                            <div class="profile-placeholder">
+                                <span><%= resume.name.charAt(0) %></span>
+                            </div>
+                        </div>
+                        <div class="experience-badge">
+                            <span class="experience-number">
+                                <% 
+                                let gradYear = "";
+                                if (resume.education && resume.education.length > 0) {
+                                    const match = resume.education[0].graduation_date.match(/\d{4}/);
+                                    if (match) gradYear = match[0];
+                                }
+                                %>
+                                <%= gradYear %>
+                            </span>
+                            <span class="experience-text">GRAD</span>
+                        </div>
+                    </div>
+                    
+                    <div class="about-text">
+                        <h3>Who am I?</h3>
+                        <p class="intro-paragraph">
+                            I'm <strong><%= resume.name %></strong>, a passionate 
+                            <% if (resume.education && resume.education.length > 0) { %>
+                                <%= resume.education[0].degree %> graduate
+                                from <%= resume.education[0].institution %>.
+                            <% } else { %>
+                                professional.
+                            <% } %>
+                            I specialize in building robust applications and solving complex problems through innovative solutions.
+                        </p>
+                        
+                        <p>
+                            Based in <%= resume.contact.location %>, I'm committed to creating clean, efficient, and user-centric solutions. 
+                            My passion drives me to continuously expand my knowledge and skills in this ever-evolving landscape.
+                        </p>
+                        
+                        <div class="personal-info">
+                            <div class="info-item">
+                                <span class="info-label">Location:</span>
+                                <span class="info-value"><%= resume.contact.location %></span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Email:</span>
+                                <span class="info-value"><%= resume.contact.email %></span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Phone:</span>
+                                <span class="info-value"><%= resume.contact.phone %></span>
+                            </div>
+                        </div>
+                        
+                        <a href="#contact" class="contact-link">Let's Connect</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Experience Section -->
+        <section id="experience" class="experience-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Experience</h2>
+                    <div class="section-bar"></div>
+                </div>
+                
+                <% if (!resume.experience || resume.experience.length === 0) { %>
+                    <div class="no-experience">
+                        <p>No work experience information available.</p>
+                    </div>
+                <% } else { %>
+                    <div class="experience-container">
+                        <div class="experience-tabs">
+                            <% resume.experience.forEach((exp, index) => { %>
+                                <div class="experience-tab <%= index === 0 ? 'active' : '' %>" data-index="<%= index %>">
+                                    <div class="tab-content">
+                                        <div class="company-name"><%= exp.company %></div>
+                                        <div class="position-title"><%= exp.position %></div>
+                                    </div>
+                                    <div class="experience-indicator"></div>
+                                </div>
+                            <% }); %>
+                        </div>
+                        
+                        <div class="experience-details">
+                            <% resume.experience.forEach((exp, index) => { %>
+                                <div class="experience-card" style="display: <%= index === 0 ? 'block' : 'none' %>" data-exp-index="<%= index %>">
+                                    <div class="experience-header">
+                                        <div class="experience-title">
+                                            <h3><%= exp.position %></h3>
+                                            <div class="company"><%= exp.company %></div>
+                                        </div>
+                                        <div class="experience-meta">
+                                            <div class="duration">
+                                                <i class="duration-icon">⏱️</i>
+                                                <span><%= exp.duration %></span>
+                                            </div>
+                                            <div class="location">
+                                                <i class="location-icon">📍</i>
+                                                <span><%= exp.location %></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="responsibilities">
+                                        <h4>Key Responsibilities</h4>
+                                        <ul>
+                                            <% exp.responsibilities.forEach((resp) => { %>
+                                                <li>
+                                                    <div class="responsibility-bullet"></div>
+                                                    <div class="responsibility-text"><%= resp %></div>
+                                                </li>
+                                            <% }); %>
+                                        </ul>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+        </section>
+
+        <!-- Projects Section -->
+        <section id="projects" class="projects-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Projects</h2>
+                    <div class="section-bar"></div>
+                </div>
+                
+                <% if (!resume.projects || resume.projects.length === 0) { %>
+                    <div class="no-projects">
+                        <p>No projects information available.</p>
+                    </div>
+                <% } else { %>
+                    <%
+                    // Extract all unique technologies
+                    const allTechnologies = [];
+                    resume.projects.forEach(project => {
+                        if (project.technologies) {
+                            project.technologies.forEach(tech => {
+                                if (!allTechnologies.includes(tech)) {
+                                    allTechnologies.push(tech);
+                                }
+                            });
+                        }
+                    });
+                    
+                    // Limit to top 5 technologies
+                    const topTechnologies = allTechnologies.slice(0, 5);
+                    %>
+                    
+                    <% if (topTechnologies.length > 0) { %>
+                        <div class="project-filters">
+                            <button class="filter-btn active" data-filter="all">All Projects</button>
+                            <% topTechnologies.forEach(tech => { %>
+                                <button class="filter-btn" data-filter="<%= tech %>"><%= tech %></button>
+                            <% }); %>
+                        </div>
+                    <% } %>
+                    
+                    <div class="projects-grid">
+                        <% resume.projects.forEach((project, index) => { %>
+                            <div class="project-card" data-technologies="<%= project.technologies ? project.technologies.join(',') : '' %>">
+                                <div class="project-content">
+                                    <h3 class="project-title"><%= project.name %></h3>
+                                    <p class="project-description"><%= project.description %></p>
+                                    
+                                    <% if (project.technologies && project.technologies.length > 0) { %>
+                                        <div class="project-technologies">
+                                            <% project.technologies.forEach(tech => { %>
+                                                <span class="technology-tag"><%= tech %></span>
+                                            <% }); %>
+                                        </div>
+                                    <% } %>
+                                </div>
+                                
+                                <div class="project-overlay">
+                                    <div class="project-overlay-content">
+                                        <div class="project-icon">🚀</div>
+                                        <h3><%= project.name %></h3>
+                                        <div class="overlay-actions">
+                                            <button class="project-details-btn">Details</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                <% } %>
+            </div>
+        </section>
+
+        <!-- Skills Section -->
+        <section id="skills" class="skills-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Skills</h2>
+                    <div class="section-bar"></div>
+                </div>
+                
+                <% 
+                const hasLanguages = resume.skills && resume.skills.languages && resume.skills.languages.length > 0;
+                const hasTools = resume.skills && resume.skills.tools && resume.skills.tools.length > 0;
+                %>
+                
+                <% if (!hasLanguages && !hasTools) { %>
+                    <div class="no-skills">
+                        <p>No skills information available.</p>
+                    </div>
+                <% } else { %>
+                    <div class="skills-container">
+                        <% if (hasLanguages) { %>
+                            <div class="skill-category visible">
+                                <div class="category-header">
+                                    <span class="category-icon">💻</span>
+                                    <h3>Languages</h3>
+                                </div>
+                                
+                                <div class="skills-list">
+                                    <% resume.skills.languages.forEach((skill, index) => { %>
+                                        <div class="skill-item">
+                                            <div class="skill-name"><%= skill %></div>
+                                            <div class="skill-bar">
+                                                <div class="skill-progress"></div>
+                                            </div>
+                                        </div>
+                                    <% }); %>
+                                </div>
+                            </div>
+                        <% } %>
+                        
+                        <% if (hasTools) { %>
+                            <div class="skill-category visible">
+                                <div class="category-header">
+                                    <span class="category-icon">🛠️</span>
+                                    <h3>Tools & Platforms</h3>
+                                </div>
+                                
+                                <div class="skills-list">
+                                    <% resume.skills.tools.forEach((skill, index) => { %>
+                                        <div class="skill-item">
+                                            <div class="skill-name"><%= skill %></div>
+                                            <div class="skill-bar">
+                                                <div class="skill-progress"></div>
+                                            </div>
+                                        </div>
+                                    <% }); %>
+                                </div>
+                            </div>
+                        <% } %>
+                    </div>
+                    
+                    <div class="skills-circular-container visible">
+                        <% 
+                        let allSkills = [];
+                        if (hasLanguages) allSkills = allSkills.concat(resume.skills.languages);
+                        if (hasTools) allSkills = allSkills.concat(resume.skills.tools);
+                        
+                        allSkills.forEach((skill, index) => { 
+                        %>
+                            <div class="skill-bubble" style="animation-delay: <%= index * 0.1 %>s; animation-duration: <%= Math.random() * 5 + 10 %>s">
+                                <%= skill %>
+                            </div>
+                        <% }); %>
+                    </div>
+                <% } %>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="contact-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Contact Me</h2>
+                    <div class="section-bar"></div>
+                </div>
+                
+                <div class="contact-container">
+                    <div class="contact-info">
+                        <h3>Get In Touch</h3>
+                        <p>I'm always open to new opportunities and collaborations. Feel free to reach out!</p>
+                        
+                        <div class="info-items">
+                            <div class="info-item">
+                                <div class="info-icon">
+                                    <i>📍</i>
+                                </div>
+                                <div class="info-content">
+                                    <h4>Location</h4>
+                                    <p><%= resume.contact.location %></p>
+                                </div>
+                            </div>
+                            
+                            <div class="info-item">
+                                <div class="info-icon">
+                                    <i>📧</i>
+                                </div>
+                                <div class="info-content">
+                                    <h4>Email</h4>
+                                    <p><a href="mailto:<%= resume.contact.email %>"><%= resume.contact.email %></a></p>
+                                </div>
+                            </div>
+                            
+                            <div class="info-item">
+                                <div class="info-icon">
+                                    <i>📱</i>
+                                </div>
+                                <div class="info-content">
+                                    <h4>Phone</h4>
+                                    <p><a href="tel:<%= resume.contact.phone %>"><%= resume.contact.phone %></a></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="social-links">
+                            <a href="#" class="social-icon" aria-label="LinkedIn">
+                                <i>in</i>
+                            </a>
+                            <a href="#" class="social-icon" aria-label="GitHub">
+                                <i>GH</i>
+                            </a>
+                            <a href="#" class="social-icon" aria-label="Twitter">
+                                <i>T</i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-form-container">
+                        <h3>Send A Message</h3>
+                        
+                        <div id="contact-form">
+                            <form class="contact-form" id="messageForm">
+                                <div class="form-group">
+                                    <label for="name">Your Name</label>
+                                    <input
+                                        type="text"
+                                        id="name"
+                                        name="name"
+                                        required
+                                    />
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="email">Your Email</label>
+                                    <input
+                                        type="email"
+                                        id="email"
+                                        name="email"
+                                        required
+                                    />
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="subject">Subject</label>
+                                    <input
+                                        type="text"
+                                        id="subject"
+                                        name="subject"
+                                        required
+                                    />
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="message">Message</label>
+                                    <textarea
+                                        id="message"
+                                        name="message"
+                                        rows="5"
+                                        required
+                                    ></textarea>
+                                </div>
+                                
+                                <button type="submit" class="submit-btn">
+                                    Send Message
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <div id="success-message" style="display:none;">
+                            <div class="success-message">
+                                <div class="success-icon">✓</div>
+                                <h4>Message Sent!</h4>
+                                <p>Thank you for reaching out. I'll get back to you as soon as possible.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <div class="logo">
+                        <span class="name-initial"><%= resume.name.charAt(0) %></span>
+                        <span class="full-name"><%= resume.name.split(' ')[0] %></span>
+                    </div>
+                    <p class="copyright">
+                        &copy; <%= new Date().getFullYear() %> <%= resume.name %>. All rights reserved.
+                    </p>
+                </div>
+                
+                <div class="footer-links">
+                    <div class="footer-nav">
+                        <h4>Navigation</h4>
+                        <ul>
+                            <li><a href="#hero">Home</a></li>
+                            <li><a href="#about">About</a></li>
+                            <li><a href="#experience">Experience</a></li>
+                            <li><a href="#projects">Projects</a></li>
+                            <li><a href="#skills">Skills</a></li>
+                            <li><a href="#contact">Contact</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="social-links">
+                        <h4>Connect</h4>
+                        <div class="social-icons">
+                            <a href="#" class="social-icon" aria-label="LinkedIn">
+                                <i>in</i>
+                            </a>
+                            <a href="#" class="social-icon" aria-label="GitHub">
+                                <i>GH</i>
+                            </a>
+                            <a href="#" class="social-icon" aria-label="Twitter">
+                                <i>T</i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="scroll-to-top">
+                <span>↑</span>
+            </div>
+            
+            <div class="footer-attribution">
+                <p>Generated with Resume Website Generator</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        document.querySelector('.mobile-menu-btn').addEventListener('click', function() {
+            const menuIcon = this.querySelector('.menu-icon');
+            const mobileMenu = document.querySelector('.mobile-menu');
+            
+            menuIcon.classList.toggle('open');
+            mobileMenu.classList.toggle('open');
+        });
+        
+        // Experience tab switching
+        document.querySelectorAll('.experience-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const index = this.dataset.index;
+                
+                // Update active tab
+                document.querySelectorAll('.experience-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Show corresponding experience card
+                document.querySelectorAll('.experience-card').forEach(card => {
+                    card.style.display = 'none';
+                });
+                document.querySelector(`.experience-card[data-exp-index="${index}"]`).style.display = 'block';
+            });
+        });
+        
+        // Project filtering
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const filter = this.dataset.filter;
+                
+                // Update active button
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Filter projects
+                document.querySelectorAll('.project-card').forEach(card => {
+                    if (filter === 'all') {
+                        card.style.display = 'block';
+                    } else {
+                        const technologies = card.dataset.technologies.split(',');
+                        if (technologies.includes(filter)) {
+                            card.style.display = 'block';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    }
+                });
+            });
+        });
+        
+        // Scroll to top
+        document.querySelector('.scroll-to-top').addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+        
+        // Contact form
+        document.getElementById('messageForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            document.getElementById('contact-form').style.display = 'none';
+            document.getElementById('success-message').style.display = 'block';
+        });
+        
+        // Intersection Observer for animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        // Observe elements for animation
+        document.querySelectorAll('.skill-category, .skills-circular-container').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

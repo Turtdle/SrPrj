@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1e4e8c">
+    <meta name="description" content="Professional Portfolio Website">
+    <title><%= resume.name %> | Professional Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Georgia:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/resumes/<%= resumeId %>/css/style.css">
+    <style>
+        /* Additional inline styles for direct HTML rendering */
+        :root {
+            /* WordPress-inspired color palette */
+            --wp-primary: #0073aa;
+            --wp-primary-dark: #005177;
+            --wp-primary-light: #00a0d2;
+            --wp-secondary: #23282d;
+            --wp-text: #444;
+            --wp-light-gray: #f1f1f1;
+            --wp-medium-gray: #e5e5e5;
+            --wp-dark-gray: #32373c;
+            --wp-success: #46b450;
+            --wp-warning: #ffb900;
+            --wp-danger: #dc3232;
+            --wp-accent: #826eb4;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+            padding-top: 80px;
+        }
+        
+        /* Main container */
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+    </style>
+</head>
+<body class="wp-site">
+    <!-- Header -->
+    <header class="wp-admin-header">
+        <div class="container">
+            <div class="wp-admin-header-content">
+                <div class="wp-brand">
+                    <a href="#profile">
+                        <div class="wp-logo"><%= resume.name.charAt(0) %></div>
+                        <div class="wp-site-title"><%= resume.name.split(' ')[0] %>'s Portfolio</div>
+                    </a>
+                </div>
+                
+                <nav class="wp-admin-nav">
+                    <ul>
+                        <li><a href="#profile" class="active">Home</a></li>
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#experience">Experience</a></li>
+                        <li><a href="#education">Education</a></li>
+                        <li><a href="#skills">Skills</a></li>
+                        <li><a href="#portfolio">Portfolio</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </nav>
+                
+                <button class="wp-menu-toggle" aria-label="Toggle menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+            
+            <nav class="wp-mobile-nav">
+                <ul>
+                    <li><a href="#profile" class="active">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#experience">Experience</a></li>
+                    <li><a href="#education">Education</a></li>
+                    <li><a href="#skills">Skills</a></li>
+                    <li><a href="#portfolio">Portfolio</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    
+    <main class="wp-main">
+        <!-- Profile Section -->
+        <section id="profile" class="wp-profile-section">
+            <div class="container">
+                <div class="wp-profile-container">
+                    <div class="wp-profile-content">
+                        <div class="wp-profile-hello">Welcome, I'm</div>
+                        <h1 class="wp-profile-name"><%= resume.name %></h1>
+                        <span class="wp-profile-title" id="typing-text"></span>
+                        
+                        <p class="wp-profile-description">
+                            <% if (resume.education && resume.education.length > 0) { %>
+                                A passionate professional with a <%= resume.education[0].degree %> from 
+                                <%= resume.education[0].institution %>. Based in <%= resume.contact.location %>, 
+                                I bring a strong educational background to delivering exceptional solutions in my field.
+                            <% } else { %>
+                                A passionate professional based in <%= resume.contact.location %>. 
+                                I specialize in crafting exceptional digital experiences and innovative solutions.
+                            <% } %>
+                        </p>
+                        
+                        <div class="wp-profile-buttons">
+                            <button class="wp-button wp-button-large" onclick="document.getElementById('contact').scrollIntoView({behavior: 'smooth'})">
+                                Get In Touch
+                            </button>
+                            <button class="wp-button wp-button-secondary wp-button-large">
+                                Download CV
+                            </button>
+                        </div>
+                        
+                        <div class="wp-profile-social">
+                            <a href="#" class="wp-social-link" aria-label="LinkedIn">
+                                in
+                            </a>
+                            <a href="#" class="wp-social-link" aria-label="GitHub">
+                                GH
+                            </a>
+                            <a href="#" class="wp-social-link" aria-label="Twitter">
+                                T
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="wp-profile-image">
+                        <div class="wp-profile-avatar">
+                            <div class="wp-profile-initial"><%= resume.name.charAt(0) %></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- About Section -->
+        <section id="about" class="wp-about-section">
+            <div class="container">
+                <div class="wp-section-header">
+                    <h2>About Me</h2>
+                    <p>Professional background and personal approach</p>
+                </div>
+                
+                <div class="wp-about-container">
+                    <div class="wp-about-image">
+                        <div class="wp-about-avatar">
+                            <div class="wp-profile-initial"><%= resume.name.charAt(0) %></div>
+                        </div>
+                    </div>
+                    
+                    <div class="wp-about-content">
+                        <h3 class="wp-about-title">Who am I?</h3>
+                        <p class="wp-about-lead">
+                            I'm a dedicated professional with a passion for excellence and continuous growth in my field.
+                        </p>
+                        
+                        <p class="wp-about-text">
+                            With a strong foundation in my area of expertise, I bring a unique perspective and a wealth of 
+                            experience to every project. I believe in a methodical, detail-oriented approach, balanced with 
+                            creative problem-solving and innovative thinking.
+                        </p>
+                        
+                        <p class="wp-about-text">
+                            My professional philosophy centers around delivering exceptional results while maintaining the 
+                            highest standards of integrity and professionalism. I'm committed to ongoing learning and adaptation 
+                            in an ever-evolving landscape.
+                        </p>
+                        
+                        <div class="wp-about-features">
+                            <div class="wp-feature-item">
+                                <div class="wp-feature-icon">🎯</div>
+                                <div class="wp-feature-content">
+                                    <h4>Mission-Driven</h4>
+                                    <p>I approach each project with clear objectives and unwavering dedication.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="wp-feature-item">
+                                <div class="wp-feature-icon">💡</div>
+                                <div class="wp-feature-content">
+                                    <h4>Innovative Approach</h4>
+                                    <p>I combine analytical thinking with creative solutions to address complex challenges.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="wp-feature-item">
+                                <div class="wp-feature-icon">🤝</div>
+                                <div class="wp-feature-content">
+                                    <h4>Collaborative Spirit</h4>
+                                    <p>I thrive in both independent and team environments, valuing diverse perspectives.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="wp-profile-buttons">
+                            <a href="#contact" class="wp-button">Let's Connect</a>
+                            <a href="#experience" class="wp-button wp-button-secondary">View Experience</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Experience Section -->
+        <section id="experience" class="wp-experience-section">
+            <div class="container">
+                <div class="wp-section-header">
+                    <h2>Professional Experience</h2>
+                    <p>My professional journey and career highlights</p>
+                </div>
+                
+                <% if (!resume.experience || resume.experience.length === 0) { %>
+                    <div class="wp-card">
+                        <div class="wp-card-content">
+                            <p>No professional experience information available.</p>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <div class="wp-timeline">
+                        <% resume.experience.forEach((exp, index) => { %>
+                            <div class="wp-timeline-item">
+                                <div class="wp-timeline-dot"></div>
+                                <div class="wp-timeline-content">
+                                    <span class="wp-timeline-date"><%= exp.duration %></span>
+                                    <h3 class="wp-timeline-title"><%= exp.position %></h3>
+                                    <h4 class="wp-timeline-subtitle"><%= exp.company %></h4>
+                                    <p class="wp-timeline-location"><%= exp.location %></p>
+                                    
+                                    <div class="wp-responsibilities">
+                                        <h5>Key Responsibilities:</h5>
+                                        <ul>
+                                            <% exp.responsibilities.forEach(resp => { %>
+                                                <li><%= resp %></li>
+                                            <% }); %>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                    
+                    <div class="wp-experience-summary">
+                        <div class="wp-card" style="margin-top: 40px;">
+                            <div class="wp-card-content">
+                                <h3>Professional Approach</h3>
+                                <p>
+                                    Throughout my career, I've consistently demonstrated a commitment to excellence, 
+                                    adaptability, and continuous improvement. My professional experiences have equipped 
+                                    me with a unique set of skills and perspectives that I bring to every new challenge.
+                                </p>
+                                <a href="#contact" class="wp-button">Discuss Opportunities</a>
+                            </div>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+        </section>
+        
+        <!-- Education Section -->
+        <section id="education" class="wp-education-section">
+            <div class="container">
+                <div class="wp-section-header">
+                    <h2>Educational Background</h2>
+                    <p>Academic achievements and qualifications</p>
+                </div>
+                
+                <% if (!resume.education || resume.education.length === 0) { %>
+                    <div class="wp-card">
+                        <div class="wp-card-content">
+                            <p>No educational information available.</p>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <div class="wp-education-cards">
+                        <% resume.education.forEach((edu, index) => { 
+                            // Determine education type for styling
+                            let educationType = "Other";
+                            const degreeLower = edu.degree.toLowerCase();
+                            
+                            if (degreeLower.includes('master') || degreeLower.includes('mba') || degreeLower.includes('ms') || degreeLower.includes('ma')) {
+                                educationType = 'Masters';
+                            } else if (degreeLower.includes('phd') || degreeLower.includes('doctor') || degreeLower.includes('doctorate')) {
+                                educationType = 'Doctorate';
+                            } else if (degreeLower.includes('bachelor') || degreeLower.includes('bs') || degreeLower.includes('ba')) {
+                                educationType = 'Bachelors';
+                            } else if (degreeLower.includes('associate') || degreeLower.includes('as') || degreeLower.includes('aa')) {
+                                educationType = 'Associates';
+                            } else if (degreeLower.includes('certificate') || degreeLower.includes('certification')) {
+                                educationType = 'Certificate';
+                            }
+                        %>
+                        
+                            <div class="wp-education-card">
+                                <div class="wp-education-icon">
+                                    <span><%= educationType === 'Doctorate' ? '🎓' : educationType === 'Masters' ? '🎯' : '📚' %></span>
+                                </div>
+                                
+                                <div class="wp-education-content">
+                                    <div class="wp-education-date"><%= edu.graduation_date %></div>
+                                    <h3 class="wp-education-degree"><%= edu.degree %></h3>
+                                    <h4 class="wp-education-school"><%= edu.institution %></h4>
+                                    
+                                    <% if (edu.gpa) { %>
+                                        <div class="wp-education-gpa">
+                                            <span class="gpa-label">GPA:</span> <%= edu.gpa %>
+                                        </div>
+                                    <% } %>
+                                    
+                                    <% if (edu.relevant_coursework && edu.relevant_coursework.length > 0) { %>
+                                        <div class="wp-education-courses">
+                                            <h5>Relevant Coursework:</h5>
+                                            <ul class="coursework-list">
+                                                <% edu.relevant_coursework.forEach(course => { %>
+                                                    <li><%= course %></li>
+                                                <% }); %>
+                                            </ul>
+                                        </div>
+                                    <% } %>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                    
+                    <% if (resume.education.length > 1) { %>
+                        <div class="wp-notice" style="margin-top: 40px;">
+                            <h3>Educational Journey</h3>
+                            <p>
+                                My academic background includes <%= resume.education.length %> degrees, reflecting my commitment to 
+                                continuous learning and comprehensive skill development. This diverse educational foundation has provided me 
+                                with a unique perspective that I bring to my professional work.
+                            </p>
+                        </div>
+                    <% } else { %>
+                        <div class="wp-notice" style="margin-top: 40px;">
+                            <h3>Commitment to Learning</h3>
+                            <p>
+                                Education has been the foundation of my professional development. I am committed to 
+                                continuous learning and regularly enhance my skills through professional development 
+                                opportunities, workshops, and industry certifications.
+                            </p>
+                        </div>
+                    <% } %>
+                <% } %>
+            </div>
+        </section>
+        
+        <!-- Skills Section -->
+        <section id="skills" class="wp-skills-section">
+            <div class="container">
+                <div class="wp-section-header">
+                    <h2>Professional Skills</h2>
+                    <p>Expertise and technical competencies</p>
+                </div>
+                
+                <% 
+                const hasLanguages = resume.skills && resume.skills.languages && resume.skills.languages.length > 0;
+                const hasTools = resume.skills && resume.skills.tools && resume.skills.tools.length > 0;
+                %>
+                
+                <% if (!hasLanguages && !hasTools) { %>
+                    <div class="wp-card">
+                        <div class="wp-card-content">
+                            <p class="no-content-message">No skills information available.</p>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <div class="skills-content">
+                        <% if (hasLanguages) { %>
+                            <div class="skills-category">
+                                <h3>Languages</h3>
+                                <div class="skills-group">
+                                    <% resume.skills.languages.forEach((lang, index) => { %>
+                                        <div class="progress-container">
+                                            <div class="progress-label">
+                                                <span><%= lang %></span>
+                                                <span class="progress-percent">
+                                                    <%= Math.floor(Math.random() * 20) + 80 %>%
+                                                </span>
+                                            </div>
+                                            <div class="progress-bar">
+                                                <div 
+                                                    class="progress-fill" 
+                                                    style="width: <%= Math.floor(Math.random() * 20) + 80 %>%"
+                                                ></div>
+                                            </div>
+                                        </div>
+                                    <% }); %>
+                                </div>
+                            </div>
+                        <% } %>
+                        
+                        <% if (hasTools) { %>
+                            <div class="skills-category">
+                                <h3>Tools & Technologies</h3>
+                                <div class="skills-group">
+                                    <% resume.skills.tools.forEach((tool, index) => { %>
+                                        <div class="progress-container">
+                                            <div class="progress-label">
+                                                <span><%= tool %></span>
+                                                <span class="progress-percent">
+                                                    <%= Math.floor(Math.random() * 20) + 80 %>%
+                                                </span>
+                                            </div>
+                                            <div class="progress-bar">
+                                                <div 
+                                                    class="progress-fill" 
+                                                    style="width: <%= Math.floor(Math.random() * 20) + 80 %>%"
+                                                ></div>
+                                            </div>
+                                        </div>
+                                    <% }); %>
+                                </div>
+                            </div>
+                        <% } %>
+                    </div>
+                    
+                    <div class="skills-supplements">
+                        <div class="supplements-content">
+                            <div class="wp-card" style="margin-top: 40px;">
+                                <div class="wp-card-content">
+                                    <h3>Professional Development</h3>
+                                    <p>
+                                        I continuously enhance my skill set through regular professional development, 
+                                        staying current with industry trends and best practices. This commitment to 
+                                        continuous learning ensures I can provide the highest level of expertise.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+        </section>
+        
+        <!-- Portfolio Section -->
+        <section id="portfolio" class="wp-portfolio-section">
+            <div class="container">
+                <div class="wp-section-header">
+                    <h2>Project Portfolio</h2>
+                    <p>Showcasing selected professional work</p>
+                </div>
+                
+                <% if (!resume.projects || resume.projects.length === 0) { %>
+                    <div class="wp-card">
+                        <div class="wp-card-content">
+                            <p>No project information available.</p>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <% 
+                    // Extract all technologies for filter
+                    const allTechnologies = [];
+                    resume.projects.forEach(proj => {
+                        if (proj.technologies && proj.technologies.length > 0) {
+                            proj.technologies.forEach(tech => {
+                                if (!allTechnologies.includes(tech)) {
+                                    allTechnologies.push(tech);
+                                }
+                            });
+                        }
+                    });
+                    
+                    // Create filter buttons with 'All' as default
+                    const filterCategories = ['all', ...allTechnologies];
+                    %>
+                    
+                    <% if (allTechnologies.length > 0) { %>
+                        <div class="wp-portfolio-filters">
+                            <% filterCategories.forEach((filter, index) => { %>
+                                <button 
+                                    class="wp-filter-button <%= filter === 'all' ? 'active' : '' %>"
+                                    data-filter="<%= filter %>"
+                                >
+                                    <%= filter === 'all' ? 'All Projects' : filter %>
+                                </button>
+                            <% }); %>
+                        </div>
+                    <% } %>
+                    
+                    <!-- Projects grid -->
+                    <div class="wp-portfolio-grid">
+                        <% resume.projects.forEach((project, index) => { %>
+                            <div class="wp-portfolio-item" data-technologies="<%= project.technologies ? project.technologies.join(',') : '' %>">
+                                <div class="wp-portfolio-image">
+                                    <div class="wp-portfolio-placeholder">
+                                        <%= project.name.charAt(0) %>
+                                    </div>
+                                </div>
+                                <div class="wp-portfolio-content">
+                                    <h3 class="wp-portfolio-title"><%= project.name %></h3>
+                                    <p class="wp-portfolio-description">
+                                        <%= project.description %>
+                                    </p>
+                                    <% if (project.technologies && project.technologies.length > 0) { %>
+                                        <div class="wp-portfolio-tags">
+                                            <% project.technologies.slice(0, 3).forEach(tech => { %>
+                                                <span class="wp-portfolio-tag"><%= tech %></span>
+                                            <% }); %>
+                                            <% if (project.technologies.length > 3) { %>
+                                                <span class="wp-portfolio-tag">+<%= project.technologies.length - 3 %> more</span>
+                                            <% } %>
+                                        </div>
+                                    <% } %>
+                                    <button 
+                                        class="wp-portfolio-button"
+                                        data-project-id="<%= index %>"
+                                    >
+                                        View Details
+                                    </button>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                    
+                    <!-- Project modal (hidden initially) -->
+                    <div id="project-modal" class="wp-portfolio-modal" style="display: none;">
+                        <div class="wp-modal-content">
+                            <div class="wp-modal-header">
+                                <h2 class="wp-modal-title" id="modal-title"></h2>
+                                <button class="wp-modal-close">×</button>
+                            </div>
+                            
+                            <div class="wp-modal-body">
+                                <div class="wp-modal-image">
+                                    <div class="wp-modal-placeholder" id="modal-initial"></div>
+                                </div>
+                                
+                                <div class="wp-modal-description">
+                                    <h3>Project Overview</h3>
+                                    <p id="modal-description"></p>
+                                    
+                                    <div class="wp-modal-technologies">
+                                        <h3>Technologies Used</h3>
+                                        <div class="wp-tech-list" id="modal-technologies"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="wp-card-footer">
+                                <button class="wp-button" id="modal-close-btn">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+        </section>
+        
+        <!-- Contact Section -->
+        <section id="contact" class="wp-skills-section">
+            <div class="container">
+                <div class="wp-section-header">
+                    <h2>Contact Me</h2>
+                    <p>Get in touch for inquiries and opportunities</p>
+                </div>
+                
+                <div class="wp-card" style="margin-bottom: 40px;">
+                    <div class="wp-card-header">
+                        <h3>Contact Information</h3>
+                    </div>
+                    <div class="wp-card-content">
+                        <div class="wp-contact-info">
+                            <div class="wp-contact-item">
+                                <div class="wp-contact-icon">📍</div>
+                                <div class="wp-contact-details">
+                                    <h4>Location</h4>
+                                    <p><%= resume.contact.location %></p>
+                                </div>
+                            </div>
+                            
+                            <div class="wp-contact-item">
+                                <div class="wp-contact-icon">📧</div>
+                                <div class="wp-contact-details">
+                                    <h4>Email</h4>
+                                    <p><a href="mailto:<%= resume.contact.email %>"><%= resume.contact.email %></a></p>
+                                </div>
+                            </div>
+                            
+                            <div class="wp-contact-item">
+                                <div class="wp-contact-icon">📱</div>
+                                <div class="wp-contact-details">
+                                    <h4>Phone</h4>
+                                    <p><a href="tel:<%= resume.contact.phone %>"><%= resume.contact.phone %></a></p>
+                                </div>
+                            </div>
+                            
+                            <div class="wp-contact-social">
+                                <h4>Connect on Social</h4>
+                                <div class="wp-profile-social">
+                                    <a href="#" class="wp-social-link" aria-label="LinkedIn">
+                                        in
+                                    </a>
+                                    <a href="#" class="wp-social-link" aria-label="GitHub">
+                                        GH
+                                    </a>
+                                    <a href="#" class="wp-social-link" aria-label="Twitter">
+                                        T
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="wp-card">
+                    <div class="wp-card-header">
+                        <h3>Send Me a Message</h3>
+                    </div>
+                    <div class="wp-card-content">
+                        <div id="contact-form">
+                            <form class="wp-form" id="messageForm">
+                                <div class="wp-form-row">
+                                    <div class="wp-form-group">
+                                        <label for="name">Your Name</label>
+                                        <input 
+                                            type="text" 
+                                            id="name"
+                                            name="name"
+                                            placeholder="John Doe"
+                                            required
+                                        />
+                                    </div>
+                                    
+                                    <div class="wp-form-group">
+                                        <label for="email">Your Email</label>
+                                        <input 
+                                            type="email" 
+                                            id="email"
+                                            name="email"
+                                            placeholder="john@example.com"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                
+                                <div class="wp-form-group">
+                                    <label for="subject">Subject</label>
+                                    <input 
+                                        type="text" 
+                                        id="subject"
+                                        name="subject"
+                                        placeholder="How can I help you?"
+                                        required
+                                    />
+                                </div>
+                                
+                                <div class="wp-form-group">
+                                    <label for="message">Your Message</label>
+                                    <textarea 
+                                        id="message"
+                                        name="message"
+                                        placeholder="Your message here..."
+                                        rows="5"
+                                        required
+                                    ></textarea>
+                                </div>
+                                
+                                <button type="submit" class="wp-button">
+                                    Send Message
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <div id="success-message" class="wp-notice wp-notice-success" style="display: none;">
+                            <h4>Message Sent Successfully!</h4>
+                            <p>
+                                Thank you for reaching out. I'll respond to your inquiry as soon as possible.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="wp-footer">
+        <div class="container">
+            <div class="wp-footer-widgets">
+                <div class="wp-footer-widget">
+                    <div class="wp-footer-logo">
+                        <div class="wp-logo"><%= resume.name.charAt(0) %></div>
+                        <div class="wp-site-title"><%= resume.name.split(' ')[0] %>'s Portfolio</div>
+                    </div>
+                    <p class="wp-footer-tagline">
+                        Professional portfolio showcasing my work, skills, and experience.
+                    </p>
+                </div>
+                
+                <div class="wp-footer-widget">
+                    <h3 class="wp-footer-widget-title">Navigation</h3>
+                    <ul class="wp-footer-menu">
+                        <li><a href="#profile">Home</a></li>
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#experience">Experience</a></li>
+                        <li><a href="#education">Education</a></li>
+                        <li><a href="#skills">Skills</a></li>
+                        <li><a href="#portfolio">Portfolio</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="wp-footer-widget">
+                    <h3 class="wp-footer-widget-title">Connect</h3>
+                    <div class="wp-footer-social">
+                        <a href="#" class="wp-social-link" aria-label="LinkedIn">in</a>
+                        <a href="#" class="wp-social-link" aria-label="GitHub">GH</a>
+                        <a href="#" class="wp-social-link" aria-label="Twitter">T</a>
+                    </div>
+                    <p class="wp-footer-contact">
+                        Email: <a href="mailto:<%= resume.contact.email %>"><%= resume.contact.email %></a><br />
+                        Phone: <a href="tel:<%= resume.contact.phone %>"><%= resume.contact.phone %></a>
+                    </p>
+                </div>
+            </div>
+            
+            <div class="wp-footer-bottom">
+                <p class="wp-copyright">
+                    &copy; <%= new Date().getFullYear() %> <%= resume.name %>. All rights reserved.
+                </p>
+                <p class="wp-footer-credits">
+                    Powered by Professional Resume Generator
+                </p>
+            </div>
+            
+            <button 
+                class="wp-to-top" 
+                id="scroll-to-top"
+                aria-label="Scroll to top"
+            >
+                ↑
+            </button>
+        </div>
+    </footer>
+
+    <script>
+        // Professional titles for typing effect
+        const generateTitles = () => {
+            const defaultTitles = [
+                "Professional Portfolio",
+                "Digital Curriculum Vitae", 
+                "Career Showcase"
+            ];
+            
+            <% if (!resume.education || resume.education.length === 0) { %>
+                return defaultTitles;
+            <% } %>
+            
+            const educationTitles = [];
+            
+            <% if (resume.education && resume.education.length > 0) { %>
+                <% resume.education.forEach(edu => { %>
+                    const degreeLower = "<%= edu.degree %>".toLowerCase();
+                    
+                    <% // Generate titles based on highest education (assuming first is most recent) %>
+                    if (degreeLower.includes('computer science') || degreeLower.includes('software')) {
+                        educationTitles.push("Software Professional");
+                    }
+                    
+                    if (degreeLower.includes('master')) {
+                        educationTitles.push(`M${degreeLower.includes('science') ? 'S' : 'A'} Graduate`);
+                    } else if (degreeLower.includes('phd') || degreeLower.includes('doctor')) {
+                        educationTitles.push("PhD Professional");
+                    } else if (degreeLower.includes('bachelor')) {
+                        educationTitles.push(`B${degreeLower.includes('science') ? 'S' : 'A'} Graduate`);
+                    }
+                    
+                    <% // Add field-specific titles %>
+                    if (degreeLower.includes('artificial intelligence') || degreeLower.includes('ai')) {
+                        educationTitles.push("AI Specialist");
+                    } else if (degreeLower.includes('data')) {
+                        educationTitles.push("Data Professional");
+                    } else if (degreeLower.includes('engineering')) {
+                        educationTitles.push("Engineering Professional");
+                    } else if (degreeLower.includes('business')) {
+                        educationTitles.push("Business Professional");
+                    } else if (degreeLower.includes('marketing')) {
+                        educationTitles.push("Marketing Professional");
+                    }
+                <% }); %>
+            <% } %>
+            
+            // Return unique titles, with fallback to default titles if none generated
+            const uniqueTitles = [...new Set(educationTitles)];
+            return uniqueTitles.length > 0 ? uniqueTitles : defaultTitles;
+        };
+        
+        // Typing effect for job title
+        const titles = generateTitles();
+        const typingTextElement = document.getElementById('typing-text');
+        
+        let currentTitleIndex = 0;
+        let currentCharIndex = 0;
+        let isDeleting = false;
+        let typingSpeed = 150;
+        
+        function type() {
+            const currentTitle = titles[currentTitleIndex];
+            
+            // Determine next text content
+            if (isDeleting) {
+                typingTextElement.textContent = currentTitle.substring(0, currentCharIndex - 1);
+                currentCharIndex--;
+                typingSpeed = 50; // Faster when deleting
+            } else {
+                typingTextElement.textContent = currentTitle.substring(0, currentCharIndex + 1);
+                currentCharIndex++;
+                typingSpeed = 150; // Normal typing speed
+            }
+            
+            // Change direction if done typing or deleting
+            if (!isDeleting && currentCharIndex === currentTitle.length) {
+                isDeleting = true;
+                typingSpeed = 1500; // Pause after typing before deleting
+            } else if (isDeleting && currentCharIndex === 0) {
+                isDeleting = false;
+                currentTitleIndex = (currentTitleIndex + 1) % titles.length; // Next title
+                typingSpeed = 500; // Pause after deleting before typing next word
+            }
+            
+            setTimeout(type, typingSpeed);
+        }
+        
+        // Start the typing effect
+        setTimeout(type, 1000);
+        
+        // Mobile menu toggle
+        const menuToggle = document.querySelector('.wp-menu-toggle');
+        const mobileNav = document.querySelector('.wp-mobile-nav');
+        
+        menuToggle.addEventListener('click', () => {
+            menuToggle.classList.toggle('active');
+            mobileNav.classList.toggle('open');
+        });
+        
+        // Navigation active state on scroll
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('section[id]');
+            const scrollY = window.scrollY;
+            
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                const sectionHeight = section.offsetHeight;
+                const sectionId = section.getAttribute('id');
+                
+                if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+                    document.querySelector('.wp-admin-nav a[href="#' + sectionId + '"]').classList.add('active');
+                    document.querySelector('.wp-mobile-nav a[href="#' + sectionId + '"]').classList.add('active');
+                } else {
+                    document.querySelector('.wp-admin-nav a[href="#' + sectionId + '"]').classList.remove('active');
+                    document.querySelector('.wp-mobile-nav a[href="#' + sectionId + '"]').classList.remove('active');
+                }
+            });
+        });
+        
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('.wp-admin-nav a, .wp-mobile-nav a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                
+                if (targetSection) {
+                    window.scrollTo({
+                        top: targetSection.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                    
+                    // Close mobile menu if open
+                    mobileNav.classList.remove('open');
+                    menuToggle.classList.remove('active');
+                }
+            });
+        });
+        
+        // Portfolio filtering
+        document.querySelectorAll('.wp-filter-button').forEach(button => {
+            button.addEventListener('click', function() {
+                // Update active button
+                document.querySelectorAll('.wp-filter-button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                const filter = this.getAttribute('data-filter');
+                
+                // Filter portfolio items
+                document.querySelectorAll('.wp-portfolio-item').forEach(item => {
+                    if (filter === 'all') {
+                        item.style.display = 'block';
+                    } else {
+                        const technologies = item.getAttribute('data-technologies').split(',');
+                        if (technologies.includes(filter)) {
+                            item.style.display = 'block';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    }
+                });
+            });
+        });
+        
+        // Project modal functionality
+        const projectModal = document.getElementById('project-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalInitial = document.getElementById('modal-initial');
+        const modalDescription = document.getElementById('modal-description');
+        const modalTechnologies = document.getElementById('modal-technologies');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+        const modalCloseX = document.querySelector('.wp-modal-close');
+        
+        // Project data for modal
+        const projects = [
+            <% if (resume.projects && resume.projects.length > 0) { %>
+                <% resume.projects.forEach((project, index) => { %>
+                    {
+                        name: "<%= project.name %>",
+                        description: "<%= project.description %>",
+                        technologies: <%= JSON.stringify(project.technologies || []) %>
+                    }<%= index < resume.projects.length - 1 ? ',' : '' %>
+                <% }); %>
+            <% } %>
+        ];
+        
+        // Open modal when clicking on project
+        document.querySelectorAll('.wp-portfolio-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const projectId = parseInt(this.getAttribute('data-project-id'));
+                const project = projects[projectId];
+                
+                modalTitle.textContent = project.name;
+                modalInitial.textContent = project.name.charAt(0);
+                modalDescription.textContent = project.description;
+                
+                // Add technologies
+                modalTechnologies.innerHTML = '';
+                project.technologies.forEach(tech => {
+                    const techBadge = document.createElement('span');
+                    techBadge.className = 'wp-tech-badge';
+                    techBadge.textContent = tech;
+                    modalTechnologies.appendChild(techBadge);
+                });
+                
+                projectModal.style.display = 'flex';
+                document.body.style.overflow = 'hidden'; // Prevent scrolling while modal is open
+            });
+        });
+        
+        // Close modal
+        function closeModal() {
+            projectModal.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Restore scrolling
+        }
+        
+        modalCloseBtn.addEventListener('click', closeModal);
+        modalCloseX.addEventListener('click', closeModal);
+        
+        window.addEventListener('click', function(e) {
+            if (e.target === projectModal) {
+                closeModal();
+            }
+        });
+        
+        // Contact form
+        document.getElementById('messageForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            document.getElementById('contact-form').style.display = 'none';
+            document.getElementById('success-message').style.display = 'block';
+        });
+        
+        // Scroll to top
+        document.getElementById('scroll-to-top').addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+</body>
+</html>

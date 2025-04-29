@@ -2,11 +2,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const dropZone = document.getElementById('drop-zone');
     const fileInput = document.getElementById('file-input');
     const resultArea = document.getElementById('result-area');
-    
+    const templateSelector = document.getElementById('template-selector');
+
     // Only add template selector if it doesn't exist and the Upload section exists
+    // But first check if we already have template-options on the page to avoid duplication
     const existingTemplateOptions = document.querySelector('.template-options');
-    if (!existingTemplateOptions) {
-        console.log('No template options found. Adding them dynamically.');
+    if (!templateSelector && !existingTemplateOptions) {
+        console.log('Template selector not found and no existing template options. Adding it dynamically.');
         
         // Create template selector if it doesn't exist
         const uploadSection = document.getElementById('Upload');
@@ -54,38 +56,33 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Set up event handlers
-    if (dropZone) {
-        dropZone.addEventListener('click', () => {
-            fileInput.click();
-        });
+    dropZone.addEventListener('click', () => {
+        fileInput.click();
+    });
 
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('dragover');
-        });
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length) {
+            handleFiles(e.target.files);
+        }
+    });
 
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('dragover');
-        });
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    });
 
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('dragover');
-            
-            if (e.dataTransfer.files.length) {
-                handleFiles(e.dataTransfer.files);
-            }
-        });
-    }
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('dragover');
+    });
 
-    if (fileInput) {
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length) {
-                handleFiles(e.target.files);
-            }
-        });
-    }
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        
+        if (e.dataTransfer.files.length) {
+            handleFiles(e.dataTransfer.files);
+        }
+    });
 
     async function handleFiles(files) {
         const file = files[0]; 
@@ -103,26 +100,22 @@ document.addEventListener('DOMContentLoaded', () => {
         
         console.log('Selected template:', selectedTemplate);
 
-        // Update the drop zone
         dropZone.innerHTML = `<p>Drag & Drop files here or click to upload</p>`;
 
-        // Validate file type
         if (!file.name.endsWith('.docx')) {
             resultArea.innerHTML = `<p style="color: red;">Please upload a .docx file</p>`;
             return;
         }
         
-        // Show processing message
         resultArea.innerHTML = `<p>Processing ${file.name} with ${selectedTemplate} template...</p>
                              <div class="processing-spinner"></div>`;
         
-        // Create form data for the upload
+
         const formData = new FormData();
         formData.append('docxFile', file);
         formData.append('template', selectedTemplate);
         
         try {
-            // Upload the file
             const response = await fetch('/upload', {
                 method: 'POST',
                 body: formData
@@ -132,13 +125,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
                 
                 if (data.success) {
-                    // Show success message with link to the resume page
+                    const serverUrl = data.url.replace('localhost', window.location.hostname);
                     resultArea.innerHTML = `
                         <p style="color: green;">Success! Your resume website is ready!</p>
-                        <a href="${data.url}" target="_blank" class="btn-primary">View Your Resume Website</a>
+                        <a href="${serverUrl}" target="_blank" class="btn-primary">View Your Resume Website</a>
                         <p><small>Template: ${data.template}</small></p>
-                        <p><small>Resume ID: ${data.resumeId}</small></p>
+                        <p><small>Container ID: ${data.containerId}</small></p>
                         <p><small>This website will be available for 24 hours</small></p>
+                        <p><small>If the link doesn't work, try <a href="${data.url}" target="_blank">direct URL</a></small></p>
+                        <p><small>Server: ${window.location.hostname}</small></p>
                     `;
 
                 } else {
