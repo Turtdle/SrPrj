@@ -4,6 +4,7 @@ const path = require('path');
 const { exec } = require('child_process');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
+const QRCode = require('qrcode');
 
 const app = express();
 const port = 3000;
@@ -69,7 +70,7 @@ app.post('/upload', upload.single('docxFile'), async (req, res) => {
         // Execute Python script to process document
         const pythonCmd = `cd ${resumeDir} && ${pythonPath} docxtodict.py`;
         
-        exec(pythonCmd, (error, stdout, stderr) => {
+        exec(pythonCmd, async (error, stdout, stderr) => {
             if (error) {
                 console.error(`Error processing document: ${error.message}`);
                 console.error(`stdout: ${stdout}`);
@@ -180,13 +181,19 @@ app.post('/upload', upload.single('docxFile'), async (req, res) => {
                     template: templateChoice,
                     data: validatedData
                 };
-                
-                // Return success response with resume URL
+
+                // Generate QR code for the resume URL
+                const resumeUrl = `http://localhost:${port}/resume/${resumeId}`;
+                const qrCodePath = path.join(resumeDir, 'qrcode.png');
+                await QRCode.toFile(qrCodePath, resumeUrl);
+
+                // Return success response with resume URL and QR code path
                 res.json({
                     success: true,
                     resumeId: resumeId,
                     url: `/resume/${resumeId}`,
-                    template: templateChoice
+                    template: templateChoice,
+                    qrCode: `/resumes/${resumeId}/qrcode.png`
                 });
             } catch (parseError) {
                 console.error(`Error parsing or validating data.json: ${parseError.message}`);
@@ -198,6 +205,7 @@ app.post('/upload', upload.single('docxFile'), async (req, res) => {
         return res.status(500).send('Server error during resume processing');
     }
 });
+
 
 // Route to check if a resume exists
 app.get('/resume/exists/:id', (req, res) => {
