@@ -28,6 +28,7 @@ app.get('/', (req, res) => {
   res.render('index');
 });
 
+
 // Process the uploaded resume file
 app.post('/upload', upload.single('docxFile'), async (req, res) => {
     if (!req.file) {
